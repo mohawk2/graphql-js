@@ -310,6 +310,7 @@ export class GraphQLScalarType {
 
   _scalarConfig: GraphQLScalarTypeConfig<*, *>;
   _wrappedList: ?GraphQLList<*>;
+  _wrappedNonNull: ?GraphQLNonNull<*>;
 
   constructor(config: GraphQLScalarTypeConfig<*, *>): void {
     assertValidName(config.name);
@@ -369,6 +370,12 @@ export class GraphQLScalarType {
 
   wrapList(): GraphQLList<*> {
     return this._wrappedList || (this._wrappedList = new GraphQLList(this));
+  }
+
+  wrapNonNull(): GraphQLNonNull<*> {
+    return this._wrappedNonNull || (this._wrappedNonNull =
+      new GraphQLNonNull(this)
+    );
   }
 
   toJSON: () => string;
@@ -439,6 +446,7 @@ export class GraphQLObjectType {
   _fields: GraphQLFieldMap<*, *>;
   _interfaces: Array<GraphQLInterfaceType>;
   _wrappedList: ?GraphQLList<*>;
+  _wrappedNonNull: ?GraphQLNonNull<*>;
 
   constructor(config: GraphQLObjectTypeConfig<*, *>): void {
     assertValidName(config.name, config.isIntrospection);
@@ -474,6 +482,12 @@ export class GraphQLObjectType {
 
   wrapList(): GraphQLList<*> {
     return this._wrappedList || (this._wrappedList = new GraphQLList(this));
+  }
+
+  wrapNonNull(): GraphQLNonNull<*> {
+    return this._wrappedNonNull || (this._wrappedNonNull =
+      new GraphQLNonNull(this)
+    );
   }
 
   toJSON: () => string;
@@ -729,6 +743,7 @@ export class GraphQLInterfaceType {
   _typeConfig: GraphQLInterfaceTypeConfig<*, *>;
   _fields: GraphQLFieldMap<*, *>;
   _wrappedList: ?GraphQLList<*>;
+  _wrappedNonNull: ?GraphQLNonNull<*>;
 
   constructor(config: GraphQLInterfaceTypeConfig<*, *>): void {
     assertValidName(config.name);
@@ -756,6 +771,12 @@ export class GraphQLInterfaceType {
 
   wrapList(): GraphQLList<*> {
     return this._wrappedList || (this._wrappedList = new GraphQLList(this));
+  }
+
+  wrapNonNull(): GraphQLNonNull<*> {
+    return this._wrappedNonNull || (this._wrappedNonNull =
+      new GraphQLNonNull(this)
+    );
   }
 
   toJSON: () => string;
@@ -814,6 +835,7 @@ export class GraphQLUnionType {
   _typeConfig: GraphQLUnionTypeConfig<*, *>;
   _types: Array<GraphQLObjectType>;
   _wrappedList: ?GraphQLList<*>;
+  _wrappedNonNull: ?GraphQLNonNull<*>;
 
   constructor(config: GraphQLUnionTypeConfig<*, *>): void {
     assertValidName(config.name);
@@ -842,6 +864,12 @@ export class GraphQLUnionType {
 
   wrapList(): GraphQLList<*> {
     return this._wrappedList || (this._wrappedList = new GraphQLList(this));
+  }
+
+  wrapNonNull(): GraphQLNonNull<*> {
+    return this._wrappedNonNull || (this._wrappedNonNull =
+      new GraphQLNonNull(this)
+    );
   }
 
   toJSON: () => string;
@@ -936,6 +964,7 @@ export class GraphQLEnumType/* <T> */ {
   _valueLookup: Map<any/* T */, GraphQLEnumValue>;
   _nameLookup: ObjMap<GraphQLEnumValue>;
   _wrappedList: ?GraphQLList<*>;
+  _wrappedNonNull: ?GraphQLNonNull<*>;
 
   constructor(config: GraphQLEnumTypeConfig/* <T> */): void {
     this.name = config.name;
@@ -1015,6 +1044,12 @@ export class GraphQLEnumType/* <T> */ {
 
   wrapList(): GraphQLList<*> {
     return this._wrappedList || (this._wrappedList = new GraphQLList(this));
+  }
+
+  wrapNonNull(): GraphQLNonNull<*> {
+    return this._wrappedNonNull || (this._wrappedNonNull =
+      new GraphQLNonNull(this)
+    );
   }
 
   toJSON: () => string;
@@ -1125,6 +1160,7 @@ export class GraphQLInputObjectType {
   _typeConfig: GraphQLInputObjectTypeConfig;
   _fields: GraphQLInputFieldMap;
   _wrappedList: ?GraphQLList<*>;
+  _wrappedNonNull: ?GraphQLNonNull<*>;
 
   constructor(config: GraphQLInputObjectTypeConfig): void {
     assertValidName(config.name);
@@ -1179,6 +1215,12 @@ export class GraphQLInputObjectType {
 
   wrapList(): GraphQLList<*> {
     return this._wrappedList || (this._wrappedList = new GraphQLList(this));
+  }
+
+  wrapNonNull(): GraphQLNonNull<*> {
+    return this._wrappedNonNull || (this._wrappedNonNull =
+      new GraphQLNonNull(this)
+    );
   }
 
   toJSON: () => string;
@@ -1241,6 +1283,7 @@ export type GraphQLInputFieldMap =
 export class GraphQLList<T: GraphQLType> {
   ofType: T;
   _wrappedList: ?GraphQLList<*>;
+  _wrappedNonNull: ?GraphQLNonNull<*>;
 
   constructor(type: T): void {
     invariant(
@@ -1256,6 +1299,12 @@ export class GraphQLList<T: GraphQLType> {
 
   wrapList(): GraphQLList<*> {
     return this._wrappedList || (this._wrappedList = new GraphQLList(this));
+  }
+
+  wrapNonNull(): GraphQLNonNull<*> {
+    return this._wrappedNonNull || (this._wrappedNonNull =
+      new GraphQLNonNull(this)
+    );
   }
 
   toJSON: () => string;
