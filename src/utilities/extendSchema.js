@@ -590,7 +590,7 @@ export function extendSchema(
     if (typeNode.kind === Kind.NON_NULL_TYPE) {
       const nullableType = buildInputFieldType(typeNode.type);
       invariant(!(nullableType instanceof GraphQLNonNull), 'Must be nullable');
-      return new GraphQLNonNull(nullableType);
+      return nullableType.wrapNonNull();
     }
     return getInputTypeFromAST(typeNode);
   }
@@ -602,7 +602,7 @@ export function extendSchema(
     if (typeNode.kind === Kind.NON_NULL_TYPE) {
       const nullableType = buildOutputFieldType(typeNode.type);
       invariant(!(nullableType instanceof GraphQLNonNull), 'Must be nullable');
-      return new GraphQLNonNull(nullableType);
+      return nullableType.wrapNonNull();
     }
     return getOutputTypeFromAST(typeNode);
   }

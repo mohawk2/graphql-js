@@ -72,5 +72,5 @@ export function VariablesInAllowedPosition(context: ValidationContext): any {
 function effectiveType(varType, varDef) {
   return !varDef.defaultValue || varType instanceof GraphQLNonNull ?
     varType :
-    new GraphQLNonNull(varType);
+    varType.wrapNonNull();
 }

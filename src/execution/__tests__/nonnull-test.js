@@ -16,7 +16,6 @@ import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
-  GraphQLNonNull
 } from '../../type';
 
 const syncError = new Error('sync');
@@ -106,13 +105,13 @@ const dataType = new GraphQLObjectType({
   name: 'DataType',
   fields: () => ({
     sync: { type: GraphQLString },
-    nonNullSync: { type: new GraphQLNonNull(GraphQLString) },
+    nonNullSync: { type: GraphQLString.wrapNonNull() },
     promise: { type: GraphQLString },
-    nonNullPromise: { type: new GraphQLNonNull(GraphQLString) },
+    nonNullPromise: { type: GraphQLString.wrapNonNull() },
     nest: { type: dataType },
-    nonNullNest: { type: new GraphQLNonNull(dataType) },
+    nonNullNest: { type: dataType.wrapNonNull() },
     promiseNest: { type: dataType },
-    nonNullPromiseNest: { type: new GraphQLNonNull(dataType) },
+    nonNullPromiseNest: { type: dataType.wrapNonNull() },
   })
 });
 const schema = new GraphQLSchema({

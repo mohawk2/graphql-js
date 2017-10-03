@@ -99,7 +99,7 @@ function buildWrappedType(
   if (inputTypeNode.kind === Kind.NON_NULL_TYPE) {
     const wrappedType = buildWrappedType(innerType, inputTypeNode.type);
     invariant(!(wrappedType instanceof GraphQLNonNull), 'No nesting nonnull.');
-    return new GraphQLNonNull(wrappedType);
+    return wrappedType.wrapNonNull();
   }
   return innerType;
 }

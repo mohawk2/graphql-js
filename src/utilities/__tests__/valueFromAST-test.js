@@ -16,7 +16,6 @@ import {
   GraphQLString,
   GraphQLBoolean,
   GraphQLID,
-  GraphQLNonNull,
 } from '../../type';
 import { parseValue } from '../../language';
 
@@ -83,15 +82,15 @@ describe('valueFromAST', () => {
   });
 
   // Boolean!
-  const nonNullBool = new GraphQLNonNull(GraphQLBoolean);
+  const nonNullBool = GraphQLBoolean.wrapNonNull();
   // [Boolean]
   const listOfBool = GraphQLBoolean.wrapList();
   // [Boolean!]
   const listOfNonNullBool = nonNullBool.wrapList();
   // [Boolean]!
-  const nonNullListOfBool = new GraphQLNonNull(listOfBool);
+  const nonNullListOfBool = listOfBool.wrapNonNull();
   // [Boolean!]!
-  const nonNullListOfNonNullBool = new GraphQLNonNull(listOfNonNullBool);
+  const nonNullListOfNonNullBool = listOfNonNullBool.wrapNonNull();
 
   it('coerces to null unless non-null', () => {
     testCase(GraphQLBoolean, 'null', null);

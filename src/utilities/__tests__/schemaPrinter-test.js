@@ -23,7 +23,6 @@ import {
   GraphQLString,
   GraphQLInt,
   GraphQLBoolean,
-  GraphQLNonNull,
 } from '../../';
 
 
@@ -44,7 +43,7 @@ function listOf(type) {
 }
 
 function nonNull(type) {
-  return new GraphQLNonNull(type);
+  return type.wrapNonNull();
 }
 
 describe('Type System Printer', () => {

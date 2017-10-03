@@ -21,7 +21,6 @@ import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLInterfaceType,
-  GraphQLNonNull,
   GraphQLInt,
   GraphQLString,
   GraphQLID,
@@ -507,7 +506,7 @@ describe('Validate: Overlapping fields can be merged', () => {
       name: 'NonNullStringBox1',
       resolveType: () => StringBox,
       fields: {
-        scalar: { type: new GraphQLNonNull(GraphQLString) }
+        scalar: { type: GraphQLString.wrapNonNull() }
       }
     });
 
@@ -515,7 +514,7 @@ describe('Validate: Overlapping fields can be merged', () => {
       name: 'NonNullStringBox1Impl',
       interfaces: [ SomeBox, NonNullStringBox1 ],
       fields: {
-        scalar: { type: new GraphQLNonNull(GraphQLString) },
+        scalar: { type: GraphQLString.wrapNonNull() },
         unrelatedField: { type: GraphQLString },
         deepBox: { type: SomeBox },
       }
@@ -525,7 +524,7 @@ describe('Validate: Overlapping fields can be merged', () => {
       name: 'NonNullStringBox2',
       resolveType: () => StringBox,
       fields: {
-        scalar: { type: new GraphQLNonNull(GraphQLString) }
+        scalar: { type: GraphQLString.wrapNonNull() }
       }
     });
 
@@ -533,7 +532,7 @@ describe('Validate: Overlapping fields can be merged', () => {
       name: 'NonNullStringBox2Impl',
       interfaces: [ SomeBox, NonNullStringBox2 ],
       fields: {
-        scalar: { type: new GraphQLNonNull(GraphQLString) },
+        scalar: { type: GraphQLString.wrapNonNull() },
         unrelatedField: { type: GraphQLString },
         deepBox: { type: SomeBox },
       }

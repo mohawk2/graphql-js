@@ -287,14 +287,14 @@ describe('Type System: build schema from introspection', () => {
           string: { type: GraphQLString },
           listOfString: { type: GraphQLString.wrapList() },
           nonNullString: {
-            type: new GraphQLNonNull(GraphQLString)
+            type: GraphQLString.wrapNonNull()
           },
           nonNullListOfString: {
             type: new GraphQLNonNull(GraphQLString.wrapList())
           },
           nonNullListOfNonNullString: {
             type: new GraphQLNonNull(
-              (new GraphQLNonNull(GraphQLString)).wrapList()
+              (GraphQLString.wrapNonNull()).wrapList()
             )
           },
         }
@@ -329,7 +329,7 @@ describe('Type System: build schema from introspection', () => {
               },
               requiredArg: {
                 description: 'This is a required arg',
-                type: new GraphQLNonNull(GraphQLBoolean)
+                type: GraphQLBoolean.wrapNonNull()
               }
             }
           }
@@ -437,11 +437,11 @@ describe('Type System: build schema from introspection', () => {
       fields: {
         street: {
           description: 'What street is this address?',
-          type: new GraphQLNonNull(GraphQLString)
+          type: GraphQLString.wrapNonNull()
         },
         city: {
           description: 'The city the address is within?',
-          type: new GraphQLNonNull(GraphQLString)
+          type: GraphQLString.wrapNonNull()
         },
         country: {
           description: 'The country (blank will assume USA).',
@@ -779,7 +779,7 @@ describe('Type System: build schema from introspection', () => {
             foo: {
               type: (new GraphQLNonNull((
                 new GraphQLNonNull((new GraphQLNonNull(
-                (new GraphQLNonNull(GraphQLString)).wrapList()
+                (GraphQLString.wrapNonNull()).wrapList()
               )).wrapList())).wrapList())).wrapList()
             }
           }
@@ -802,7 +802,7 @@ describe('Type System: build schema from introspection', () => {
               type: new GraphQLNonNull((
                 new GraphQLNonNull((
                 new GraphQLNonNull((
-                new GraphQLNonNull(GraphQLString)
+                GraphQLString.wrapNonNull()
               ).wrapList())).wrapList())).wrapList())
             }
           }

@@ -276,7 +276,7 @@ describe('Execute: Handles list nullability', () => {
   });
 
   describe('[T!]', () => {
-    const type = (new GraphQLNonNull(GraphQLInt)).wrapList();
+    const type = (GraphQLInt.wrapNonNull()).wrapList();
 
     describe('Array<T>', () => {
 
@@ -369,7 +369,7 @@ describe('Execute: Handles list nullability', () => {
 
   describe('[T!]!', () => {
     const type =
-      new GraphQLNonNull((new GraphQLNonNull(GraphQLInt)).wrapList());
+      new GraphQLNonNull((GraphQLInt.wrapNonNull()).wrapList());
 
     describe('Array<T>', () => {
 

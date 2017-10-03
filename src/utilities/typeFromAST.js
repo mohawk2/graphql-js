@@ -49,7 +49,7 @@ function typeFromASTImpl(schema, typeNode) {
   }
   if (typeNode.kind === Kind.NON_NULL_TYPE) {
     innerType = typeFromAST(schema, typeNode.type);
-    return innerType && new GraphQLNonNull(innerType);
+    return innerType && innerType.wrapNonNull();
   }
   invariant(typeNode.kind === Kind.NAMED_TYPE, 'Must be a named type.');
   return schema.getType(typeNode.name.value);

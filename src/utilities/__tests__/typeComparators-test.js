@@ -12,7 +12,6 @@ import {
   GraphQLString,
   GraphQLInt,
   GraphQLFloat,
-  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLInterfaceType,
   GraphQLUnionType,
@@ -47,15 +46,15 @@ describe('typeComparators', () => {
     it('non-null of same type are equal', () => {
       expect(
         isEqualType(
-          new GraphQLNonNull(GraphQLInt),
-          new GraphQLNonNull(GraphQLInt)
+          GraphQLInt.wrapNonNull(),
+          GraphQLInt.wrapNonNull()
         )
       ).to.equal(true);
     });
 
     it('non-null is not equal to nullable', () => {
       expect(
-        isEqualType(new GraphQLNonNull(GraphQLInt), GraphQLInt)
+        isEqualType(GraphQLInt.wrapNonNull(), GraphQLInt)
       ).to.equal(false);
     });
 
@@ -89,14 +88,14 @@ describe('typeComparators', () => {
     it('non-null is subtype of nullable', () => {
       const schema = testSchema({ field: { type: GraphQLString } });
       expect(
-        isTypeSubTypeOf(schema, new GraphQLNonNull(GraphQLInt), GraphQLInt)
+        isTypeSubTypeOf(schema, GraphQLInt.wrapNonNull(), GraphQLInt)
       ).to.equal(true);
     });
 
     it('nullable is not subtype of non-null', () => {
       const schema = testSchema({ field: { type: GraphQLString } });
       expect(
-        isTypeSubTypeOf(schema, GraphQLInt, new GraphQLNonNull(GraphQLInt))
+        isTypeSubTypeOf(schema, GraphQLInt, GraphQLInt.wrapNonNull())
       ).to.equal(false);
     });
 

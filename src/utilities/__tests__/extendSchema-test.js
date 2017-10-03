@@ -84,7 +84,7 @@ const testSchema = new GraphQLSchema({
       someUnion: { type: SomeUnionType },
       someEnum: { type: SomeEnumType },
       someInterface: {
-        args: { id: { type: new GraphQLNonNull(GraphQLID) } },
+        args: { id: { type: GraphQLID.wrapNonNull() } },
         type: SomeInterfaceType
       },
     })

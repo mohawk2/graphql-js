@@ -16,7 +16,6 @@ import {
   GraphQLBoolean,
   GraphQLInt,
   GraphQLString,
-  GraphQLNonNull,
 } from '../../type';
 
 describe('Execute: Handles basic execution tasks', () => {
@@ -500,11 +499,11 @@ describe('Execute: Handles basic execution tasks', () => {
           resolve: () => ({}),
         },
         nonNullA: {
-          type: new GraphQLNonNull(A),
+          type: A.wrapNonNull(),
           resolve: () => ({}),
         },
         throws: {
-          type: new GraphQLNonNull(GraphQLString),
+          type: GraphQLString.wrapNonNull(),
           resolve: () => {
             throw new Error('Catch me if you can');
           },

@@ -132,7 +132,7 @@ export function buildClientSchema(
         !(nullableType instanceof GraphQLNonNull),
         'No nesting nonnull.'
       );
-      return new GraphQLNonNull(nullableType);
+      return nullableType.wrapNonNull();
     }
     return getNamedType(typeRef.name);
   }

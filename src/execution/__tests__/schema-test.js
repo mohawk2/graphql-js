@@ -13,7 +13,6 @@ import { parse } from '../../language';
 import {
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLNonNull,
   GraphQLInt,
   GraphQLString,
   GraphQLBoolean,
@@ -50,7 +49,7 @@ describe('Execute: Handles execution with a complex schema', () => {
     const BlogArticle = new GraphQLObjectType({
       name: 'Article',
       fields: {
-        id: { type: new GraphQLNonNull(GraphQLString) },
+        id: { type: GraphQLString.wrapNonNull() },
         isPublished: { type: GraphQLBoolean },
         author: { type: BlogAuthor },
         title: { type: GraphQLString },

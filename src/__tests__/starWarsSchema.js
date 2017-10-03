@@ -11,7 +11,6 @@ import {
   GraphQLEnumType,
   GraphQLInterfaceType,
   GraphQLObjectType,
-  GraphQLNonNull,
   GraphQLSchema,
   GraphQLString,
 } from '../type';
@@ -109,7 +108,7 @@ const characterInterface = new GraphQLInterfaceType({
   description: 'A character in the Star Wars Trilogy',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString.wrapNonNull(),
       description: 'The id of the character.',
     },
     name: {
@@ -157,7 +156,7 @@ const humanType = new GraphQLObjectType({
   description: 'A humanoid creature in the Star Wars universe.',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString.wrapNonNull(),
       description: 'The id of the human.',
     },
     name: {
@@ -207,7 +206,7 @@ const droidType = new GraphQLObjectType({
   description: 'A mechanical creature in the Star Wars universe.',
   fields: () => ({
     id: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString.wrapNonNull(),
       description: 'The id of the droid.',
     },
     name: {
@@ -272,7 +271,7 @@ const queryType = new GraphQLObjectType({
       args: {
         id: {
           description: 'id of the human',
-          type: new GraphQLNonNull(GraphQLString)
+          type: GraphQLString.wrapNonNull()
         }
       },
       resolve: (root, { id }) => getHuman(id),
@@ -282,7 +281,7 @@ const queryType = new GraphQLObjectType({
       args: {
         id: {
           description: 'id of the droid',
-          type: new GraphQLNonNull(GraphQLString)
+          type: GraphQLString.wrapNonNull()
         }
       },
       resolve: (root, { id }) => getDroid(id),

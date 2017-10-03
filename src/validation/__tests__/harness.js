@@ -16,7 +16,6 @@ import {
   GraphQLUnionType,
   GraphQLEnumType,
   GraphQLInputObjectType,
-  GraphQLNonNull,
   GraphQLInt,
   GraphQLFloat,
   GraphQLString,
@@ -194,7 +193,7 @@ const FurColor = new GraphQLEnumType({
 const ComplexInput = new GraphQLInputObjectType({
   name: 'ComplexInput',
   fields: {
-    requiredField: { type: new GraphQLNonNull(GraphQLBoolean) },
+    requiredField: { type: GraphQLBoolean.wrapNonNull() },
     intField: { type: GraphQLInt },
     stringField: { type: GraphQLString },
     booleanField: { type: GraphQLBoolean },
@@ -214,7 +213,7 @@ const ComplicatedArgs = new GraphQLObjectType({
     },
     nonNullIntArgField: {
       type: GraphQLString,
-      args: { nonNullIntArg: { type: new GraphQLNonNull(GraphQLInt) } },
+      args: { nonNullIntArg: { type: GraphQLInt.wrapNonNull() } },
     },
     stringArgField: {
       type: GraphQLString,
@@ -247,8 +246,8 @@ const ComplicatedArgs = new GraphQLObjectType({
     multipleReqs: {
       type: GraphQLString,
       args: {
-        req1: { type: new GraphQLNonNull(GraphQLInt) },
-        req2: { type: new GraphQLNonNull(GraphQLInt) },
+        req1: { type: GraphQLInt.wrapNonNull() },
+        req2: { type: GraphQLInt.wrapNonNull() },
       },
     },
     multipleOpts: {
@@ -267,8 +266,8 @@ const ComplicatedArgs = new GraphQLObjectType({
     multipleOptAndReq: {
       type: GraphQLString,
       args: {
-        req1: { type: new GraphQLNonNull(GraphQLInt) },
-        req2: { type: new GraphQLNonNull(GraphQLInt) },
+        req1: { type: GraphQLInt.wrapNonNull() },
+        req2: { type: GraphQLInt.wrapNonNull() },
         opt1: {
           type: GraphQLInt,
           defaultValue: 0,

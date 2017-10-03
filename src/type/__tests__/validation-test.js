@@ -71,7 +71,7 @@ const SomeInputObjectType = new GraphQLInputObjectType({
 function withModifiers(types) {
   return types
     .concat(types.map(type => type.wrapList()))
-    .concat(types.map(type => new GraphQLNonNull(type)))
+    .concat(types.map(type => type.wrapNonNull()))
     .concat(types.map(type => new GraphQLNonNull(type.wrapList())));
 }
 
@@ -1630,11 +1630,11 @@ describe('Type System: NonNull must accept GraphQL types', () => {
     SomeEnumType,
     SomeInputObjectType,
     GraphQLString.wrapList(),
-    (new GraphQLNonNull(GraphQLString)).wrapList(),
+    (GraphQLString.wrapNonNull()).wrapList(),
   ];
 
   const notNullableTypes = [
-    new GraphQLNonNull(GraphQLString),
+    GraphQLString.wrapNonNull(),
     {},
     String,
     undefined,
@@ -1643,13 +1643,13 @@ describe('Type System: NonNull must accept GraphQL types', () => {
 
   nullableTypes.forEach(type => {
     it(`accepts an type as nullable type of non-null: ${type}`, () => {
-      expect(() => new GraphQLNonNull(type)).not.to.throw();
+      expect(() => type.wrapNonNull()).not.to.throw();
     });
   });
 
   notNullableTypes.forEach(type => {
     it(`rejects a non-type as nullable type of non-null: ${type}`, () => {
-      expect(() => new GraphQLNonNull(type)).to.throw(
+      expect(() => type.wrapNonNull()).to.throw(
         `Can only create NonNull of a Nullable GraphQLType but got: ${type}.`
       );
     });
@@ -1781,7 +1781,7 @@ describe('Objects must adhere to Interface they implement', () => {
             type: GraphQLString,
             args: {
               input: { type: GraphQLString },
-              anotherInput: { type: new GraphQLNonNull(GraphQLString) },
+              anotherInput: { type: GraphQLString.wrapNonNull() },
             }
           }
         }
@@ -2085,7 +2085,7 @@ describe('Objects must adhere to Interface they implement', () => {
         name: 'AnotherObject',
         interfaces: [ AnotherInterface ],
         fields: {
-          field: { type: new GraphQLNonNull(GraphQLString) }
+          field: { type: GraphQLString.wrapNonNull() }
         }
       });
 
@@ -2099,7 +2099,7 @@ describe('Objects must adhere to Interface they implement', () => {
         name: 'AnotherInterface',
         resolveType: () => null,
         fields: {
-          field: { type: new GraphQLNonNull(GraphQLString) }
+          field: { type: GraphQLString.wrapNonNull() }
         }
       });
 

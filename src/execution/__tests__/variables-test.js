@@ -49,7 +49,7 @@ const TestInputObject = new GraphQLInputObjectType({
   fields: {
     a: { type: GraphQLString },
     b: { type: GraphQLString.wrapList() },
-    c: { type: new GraphQLNonNull(GraphQLString) },
+    c: { type: GraphQLString.wrapNonNull() },
     d: { type: TestComplexScalar },
   }
 });
@@ -57,8 +57,8 @@ const TestInputObject = new GraphQLInputObjectType({
 const TestNestedInputObject = new GraphQLInputObjectType({
   name: 'TestNestedInputObject',
   fields: {
-    na: { type: new GraphQLNonNull(TestInputObject) },
-    nb: { type: new GraphQLNonNull(GraphQLString) },
+    na: { type: TestInputObject.wrapNonNull() },
+    nb: { type: GraphQLString.wrapNonNull() },
   },
 });
 
@@ -77,7 +77,7 @@ const TestType = new GraphQLObjectType({
     },
     fieldWithNonNullableStringInput: {
       type: GraphQLString,
-      args: { input: { type: new GraphQLNonNull(GraphQLString) } },
+      args: { input: { type: GraphQLString.wrapNonNull() } },
       resolve: (_, { input }) => input && JSON.stringify(input)
     },
     fieldWithDefaultArgumentValue: {
@@ -106,13 +106,13 @@ const TestType = new GraphQLObjectType({
     },
     listNN: {
       type: GraphQLString,
-      args: { input: { type: (new GraphQLNonNull(GraphQLString)).wrapList() } },
+      args: { input: { type: (GraphQLString.wrapNonNull()).wrapList() } },
       resolve: (_, { input }) => input && JSON.stringify(input)
     },
     nnListNN: {
       type: GraphQLString,
       args: { input: { type:
-        new GraphQLNonNull((new GraphQLNonNull(GraphQLString)).wrapList())
+        new GraphQLNonNull((GraphQLString.wrapNonNull()).wrapList())
       } },
       resolve: (_, { input }) => input && JSON.stringify(input)
     },
