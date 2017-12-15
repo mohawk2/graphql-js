@@ -99,7 +99,6 @@ export type ExecutionContext = {
   operation: OperationDefinitionNode,
   variableValues: { [variable: string]: mixed },
   fieldResolver: GraphQLFieldResolver<any, any>,
-  errors: Array<GraphQLError>,
 };
 
 /**
@@ -112,6 +111,23 @@ export type ExecutionResult = {
   errors?: $ReadOnlyArray<GraphQLError>,
   data?: ObjMap<mixed>,
 };
+
+/**
+ * A partial result of GraphQL execution. `data` and `errors` as above.
+ * "NP" = "Not Promise".
+ */
+export type ExecutionPartialResultNP<T> = {
+  errors?: $ReadOnlyArray<GraphQLError>,
+  data?: T | null,
+};
+
+/**
+ * A partial result of GraphQL execution. `data` and `errors` as above.
+ * This version might be a promise.
+ */
+export type ExecutionPartialResult<T> = MaybePromise<
+  ExecutionPartialResultNP<T>,
+>;
 
 export type ExecutionArgs = {|
   schema: GraphQLSchema,
@@ -218,23 +234,20 @@ function executeImpl(
   // be executed. An execution which encounters errors will still result in a
   // resolved Promise.
   const data = executeOperation(context, context.operation, rootValue);
-  return buildResponse(context, data);
+  return buildResponse(data);
 }
 
 /**
- * Given a completed execution context and data, build the { errors, data }
- * response defined by the "Response" section of the GraphQL specification.
+ * Strip out `errors` if empty.
  */
-function buildResponse(
-  context: ExecutionContext,
-  data: MaybePromise<ObjMap<mixed> | null>,
-) {
-  if (isPromise(data)) {
-    return data.then(resolved => buildResponse(context, resolved));
+function buildResponse(result: ExecutionPartialResult<mixed>) {
+  if (isPromise(result)) {
+    return result.then(buildResponse);
   }
-  return context.errors.length === 0
-    ? { data }
-    : { errors: context.errors, data };
+  if (result.data && (!result.errors || !result.errors.length)) {
+    return { data: result.data };
+  }
+  return result;
 }
 
 /**
@@ -369,7 +382,6 @@ export function buildExecutionContext(
     operation,
     variableValues,
     fieldResolver: fieldResolver || defaultFieldResolver,
-    errors,
   };
 }
 
@@ -380,7 +392,7 @@ function executeOperation(
   exeContext: ExecutionContext,
   operation: OperationDefinitionNode,
   rootValue: mixed,
-): MaybePromise<ObjMap<mixed> | null> {
+): ExecutionPartialResult<mixed> {
   const type = getOperationRootType(exeContext.schema, operation);
   const fields = collectFields(
     exeContext,
@@ -403,15 +415,14 @@ function executeOperation(
         ? executeFieldsSerially(exeContext, type, rootValue, path, fields)
         : executeFields(exeContext, type, rootValue, path, fields);
     if (isPromise(result)) {
-      return result.then(undefined, error => {
-        exeContext.errors.push(error);
-        return Promise.resolve(null);
-      });
+      return result.then(undefined, error => ({
+        data: null,
+        errors: [error],
+      }));
     }
     return result;
   } catch (error) {
-    exeContext.errors.push(error);
-    return null;
+    return { data: null, errors: [error] };
   }
 }
 
@@ -466,8 +477,8 @@ function executeFieldsSerially(
   sourceValue: mixed,
   path: ResponsePath | void,
   fields: ObjMap<Array<FieldNode>>,
-): MaybePromise<ObjMap<mixed>> {
-  return promiseReduce(
+): ExecutionPartialResult<mixed> {
+  const finalResult = promiseReduce(
     Object.keys(fields),
     (results, responseName) => {
       const fieldNodes = fields[responseName];
@@ -479,7 +490,7 @@ function executeFieldsSerially(
         fieldNodes,
         fieldPath,
       );
-      if (result === undefined) {
+      if (result === null) {
         return results;
       }
       if (isPromise(result)) {
@@ -493,6 +504,9 @@ function executeFieldsSerially(
     },
     Object.create(null),
   );
+  return isPromise(finalResult)
+    ? finalResult.then(mergeEPRs)
+    : mergeEPRs((finalResult: any));
 }
 
 /**
@@ -505,7 +519,7 @@ function executeFields(
   sourceValue: mixed,
   path: ResponsePath | void,
   fields: ObjMap<Array<FieldNode>>,
-): MaybePromise<ObjMap<mixed>> {
+): ExecutionPartialResult<mixed> {
   let containsPromise = false;
 
   const finalResults = Object.keys(fields).reduce((results, responseName) => {
@@ -518,7 +532,7 @@ function executeFields(
       fieldNodes,
       fieldPath,
     );
-    if (result === undefined) {
+    if (result === null) {
       return results;
     }
     results[responseName] = result;
@@ -530,14 +544,31 @@ function executeFields(
 
   // If there are no promises, we can just return the object
   if (!containsPromise) {
-    return finalResults;
+    return mergeEPRs(finalResults);
   }
 
   // Otherwise, results is a map from field name to the result
   // of resolving that field, which is possibly a promise. Return
   // a promise that will return this same map, but with any
   // promises replaced with the values they resolved to.
-  return promiseForObject(finalResults);
+  return promiseForObject(finalResults).then(mergeEPRs);
+}
+
+function mergeEPRs(
+  eprMap: ObjMap<ExecutionPartialResultNP<mixed>>,
+): ExecutionPartialResultNP<mixed> {
+  const keys = Object.keys(eprMap);
+  const values = keys.map(name => eprMap[name]);
+  return values.reduce(
+    (merged, value, i) => {
+      merged.data[keys[i]] = value.data;
+      if (value.errors && value.errors.length) {
+        merged.errors.push(...value.errors);
+      }
+      return merged;
+    },
+    { data: Object.create(null), errors: [] },
+  );
 }
 
 /**
@@ -681,13 +712,13 @@ function resolveField(
   source: mixed,
   fieldNodes: $ReadOnlyArray<FieldNode>,
   path: ResponsePath,
-): MaybePromise<mixed> {
+): ExecutionPartialResult<mixed> | null {
   const fieldNode = fieldNodes[0];
   const fieldName = fieldNode.name.value;
 
   const fieldDef = getFieldDef(exeContext.schema, parentType, fieldName);
   if (!fieldDef) {
-    return;
+    return null;
   }
 
   const resolveFn = fieldDef.resolve || exeContext.fieldResolver;
@@ -791,7 +822,7 @@ function completeValueCatchingError(
   info: GraphQLResolveInfo,
   path: ResponsePath,
   result: mixed,
-): MaybePromise<mixed> {
+): ExecutionPartialResult<mixed> {
   // If the field type is non-nullable, then it is resolved without any
   // protection from errors, however it still properly locates the error.
   if (isNonNullType(returnType)) {
@@ -821,17 +852,16 @@ function completeValueCatchingError(
       // the rejection error and resolve to null.
       // Note: we don't rely on a `catch` method, but we do expect "thenable"
       // to take a second callback for the error case.
-      return completed.then(undefined, error => {
-        exeContext.errors.push(error);
-        return Promise.resolve(null);
-      });
+      return completed.then(undefined, error => ({
+        data: null,
+        errors: [error],
+      }));
     }
     return completed;
   } catch (error) {
     // If `completeValueWithLocatedError` returned abruptly (threw an error),
     // log the error and return null.
-    exeContext.errors.push(error);
-    return null;
+    return { data: null, errors: [error] };
   }
 }
 
@@ -844,7 +874,7 @@ function completeValueWithLocatedError(
   info: GraphQLResolveInfo,
   path: ResponsePath,
   result: mixed,
-): MaybePromise<mixed> {
+): ExecutionPartialResult<mixed> {
   try {
     const completed = completeValue(
       exeContext,
@@ -903,7 +933,7 @@ function completeValue(
   info: GraphQLResolveInfo,
   path: ResponsePath,
   result: mixed,
-): MaybePromise<mixed> {
+): ExecutionPartialResult<mixed> {
   // If result is a Promise, apply-lift over completeValue.
   if (isPromise(result)) {
     return result.then(resolved =>
@@ -927,7 +957,7 @@ function completeValue(
       path,
       result,
     );
-    if (completed === null) {
+    if (completed.data === null) {
       throw new Error(
         `Cannot return null for non-nullable field ${info.parentType.name}.${
           info.fieldName
@@ -939,7 +969,7 @@ function completeValue(
 
   // If result value is null-ish (null, undefined, or NaN) then return null.
   if (isNullish(result)) {
-    return null;
+    return { data: null };
   }
 
   // If field type is List, complete each item in the list with the inner type
@@ -957,7 +987,7 @@ function completeValue(
   // If field type is a leaf type, Scalar or Enum, serialize to a valid value,
   // returning null if serialization is not possible.
   if (isLeafType(returnType)) {
-    return completeLeafValue(returnType, result);
+    return { data: completeLeafValue(returnType, result) };
   }
 
   // If field type is an abstract type, Interface or Union, determine the
@@ -1005,7 +1035,7 @@ function completeListValue(
   info: GraphQLResolveInfo,
   path: ResponsePath,
   result: mixed,
-): MaybePromise<$ReadOnlyArray<mixed>> {
+): ExecutionPartialResult<mixed> {
   invariant(
     isCollection(result),
     `Expected Iterable, but did not find one for field ${
@@ -1037,7 +1067,23 @@ function completeListValue(
     completedResults.push(completedItem);
   });
 
-  return containsPromise ? Promise.all(completedResults) : completedResults;
+  return containsPromise
+    ? Promise.all(completedResults).then(flattenEPRs)
+    : flattenEPRs(completedResults);
+}
+
+function flattenEPRs(
+  eprs: $ReadOnlyArray<ExecutionPartialResultNP<mixed>>,
+): ExecutionPartialResultNP<mixed> {
+  const errors = [];
+  const data = [];
+  forEach((eprs: any), item => {
+    data.push(item.data);
+    if (item.errors && item.errors.length) {
+      errors.push(...item.errors);
+    }
+  });
+  return { data, errors };
 }
 
 /**
@@ -1067,7 +1113,7 @@ function completeAbstractValue(
   info: GraphQLResolveInfo,
   path: ResponsePath,
   result: mixed,
-): MaybePromise<ObjMap<mixed>> {
+): ExecutionPartialResult<mixed> {
   const runtimeType = returnType.resolveType
     ? returnType.resolveType(result, exeContext.contextValue, info)
     : defaultResolveTypeFn(result, exeContext.contextValue, info, returnType);
@@ -1155,7 +1201,7 @@ function completeObjectValue(
   info: GraphQLResolveInfo,
   path: ResponsePath,
   result: mixed,
-): MaybePromise<ObjMap<mixed>> {
+): ExecutionPartialResult<mixed> {
   // If there is an isTypeOf predicate function, call it with the
   // current result. If isTypeOf returns false, then raise an error rather
   // than continuing execution.
@@ -1211,7 +1257,7 @@ function collectAndExecuteSubfields(
   info: GraphQLResolveInfo,
   path: ResponsePath,
   result: mixed,
-): MaybePromise<ObjMap<mixed>> {
+): ExecutionPartialResult<mixed> {
   // Collect sub-fields to execute to complete this value.
   const subFieldNodes = collectSubfields(exeContext, returnType, fieldNodes);
   return executeFields(exeContext, returnType, result, path, subFieldNodes);
