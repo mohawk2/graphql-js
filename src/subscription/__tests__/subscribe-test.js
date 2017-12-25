@@ -14,7 +14,7 @@ import { parse } from '../../language';
 import {
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLList,
+  wrapType,
   GraphQLBoolean,
   GraphQLInt,
   GraphQLString,
@@ -41,7 +41,7 @@ const InboxType = new GraphQLObjectType({
       type: GraphQLInt,
       resolve: inbox => inbox.emails.filter(email => email.unread).length,
     },
-    emails: { type: GraphQLList(EmailType) },
+    emails: { type: wrapType(EmailType, ']') },
   },
 });
 

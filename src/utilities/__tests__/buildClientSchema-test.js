@@ -18,8 +18,7 @@ import {
   GraphQLUnionType,
   GraphQLEnumType,
   GraphQLInputObjectType,
-  GraphQLList,
-  GraphQLNonNull,
+  wrapType,
   GraphQLInt,
   GraphQLFloat,
   GraphQLString,
@@ -287,15 +286,15 @@ describe('Type System: build schema from introspection', () => {
         name: 'ComplexFields',
         fields: {
           string: { type: GraphQLString },
-          listOfString: { type: GraphQLList(GraphQLString) },
+          listOfString: { type: wrapType(GraphQLString, ']') },
           nonNullString: {
-            type: GraphQLNonNull(GraphQLString),
+            type: wrapType(GraphQLString, '!'),
           },
           nonNullListOfString: {
-            type: GraphQLNonNull(GraphQLList(GraphQLString)),
+            type: wrapType(GraphQLString, ']!'),
           },
           nonNullListOfNonNullString: {
-            type: GraphQLNonNull(GraphQLList(GraphQLNonNull(GraphQLString))),
+            type: wrapType(GraphQLString, '!]!'),
           },
         },
       }),
@@ -325,11 +324,11 @@ describe('Type System: build schema from introspection', () => {
             args: {
               listArg: {
                 description: 'This is an list of int arg',
-                type: GraphQLList(GraphQLInt),
+                type: wrapType(GraphQLInt, ']'),
               },
               requiredArg: {
                 description: 'This is a required arg',
-                type: GraphQLNonNull(GraphQLBoolean),
+                type: wrapType(GraphQLBoolean, '!'),
               },
             },
           },
@@ -471,11 +470,11 @@ describe('Type System: build schema from introspection', () => {
       fields: {
         street: {
           description: 'What street is this address?',
-          type: GraphQLNonNull(GraphQLString),
+          type: wrapType(GraphQLString, '!'),
         },
         city: {
           description: 'The city the address is within?',
-          type: GraphQLNonNull(GraphQLString),
+          type: wrapType(GraphQLString, '!'),
         },
         country: {
           description: 'The country (blank will assume USA).',
@@ -531,7 +530,7 @@ describe('Type System: build schema from introspection', () => {
             type: GraphQLString,
             args: {
               listArg: {
-                type: GraphQLList(GraphQLInt),
+                type: wrapType(GraphQLInt, ']'),
                 defaultValue: [1, 2, 3],
               },
             },
@@ -805,21 +804,7 @@ describe('Type System: build schema from introspection', () => {
       const schema = new GraphQLSchema({
         query: new GraphQLObjectType({
           name: 'Query',
-          fields: {
-            foo: {
-              type: GraphQLList(
-                GraphQLList(
-                  GraphQLList(
-                    GraphQLList(
-                      GraphQLList(
-                        GraphQLList(GraphQLList(GraphQLList(GraphQLString))),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            },
-          },
+          fields: { foo: { type: wrapType(GraphQLString, ']]]]]]]]') } },
         }),
       });
 
@@ -833,23 +818,7 @@ describe('Type System: build schema from introspection', () => {
       const schema = new GraphQLSchema({
         query: new GraphQLObjectType({
           name: 'Query',
-          fields: {
-            foo: {
-              type: GraphQLList(
-                GraphQLNonNull(
-                  GraphQLList(
-                    GraphQLNonNull(
-                      GraphQLList(
-                        GraphQLNonNull(
-                          GraphQLList(GraphQLNonNull(GraphQLString)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            },
-          },
+          fields: { foo: { type: wrapType(GraphQLString, '!]!]!]!]') } },
         }),
       });
 
@@ -864,20 +833,8 @@ describe('Type System: build schema from introspection', () => {
         query: new GraphQLObjectType({
           name: 'Query',
           fields: {
-            foo: {
-              // e.g., fully non-null 3D matrix
-              type: GraphQLNonNull(
-                GraphQLList(
-                  GraphQLNonNull(
-                    GraphQLList(
-                      GraphQLNonNull(
-                        GraphQLList(GraphQLNonNull(GraphQLString)),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            },
+            // e.g., fully non-null 3D matrix
+            foo: { type: wrapType(GraphQLString, '!]!]!]!') },
           },
         }),
       });

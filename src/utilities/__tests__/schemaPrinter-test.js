@@ -20,8 +20,7 @@ import {
   GraphQLString,
   GraphQLInt,
   GraphQLBoolean,
-  GraphQLList,
-  GraphQLNonNull,
+  wrapType,
 } from '../../';
 import { GraphQLDirective } from '../../type/directives';
 import { DirectiveLocation } from '../../language/directiveLocation';
@@ -36,14 +35,6 @@ function printSingleFieldSchema(fieldConfig) {
     fields: { singleField: fieldConfig },
   });
   return printForTest(new GraphQLSchema({ query: Root }));
-}
-
-function listOf(type) {
-  return GraphQLList(type);
-}
-
-function nonNull(type) {
-  return GraphQLNonNull(type);
 }
 
 describe('Type System Printer', () => {
@@ -64,7 +55,7 @@ describe('Type System Printer', () => {
 
   it('Prints [String] Field', () => {
     const output = printSingleFieldSchema({
-      type: listOf(GraphQLString),
+      type: wrapType(GraphQLString, ']'),
     });
     expect(output).to.equal(dedent`
       schema {
@@ -79,7 +70,7 @@ describe('Type System Printer', () => {
 
   it('Prints String! Field', () => {
     const output = printSingleFieldSchema({
-      type: nonNull(GraphQLString),
+      type: wrapType(GraphQLString, '!'),
     });
     expect(output).to.equal(dedent`
       schema {
@@ -94,7 +85,7 @@ describe('Type System Printer', () => {
 
   it('Prints [String]! Field', () => {
     const output = printSingleFieldSchema({
-      type: nonNull(listOf(GraphQLString)),
+      type: wrapType(GraphQLString, ']!'),
     });
     expect(output).to.equal(dedent`
       schema {
@@ -109,7 +100,7 @@ describe('Type System Printer', () => {
 
   it('Prints [String!] Field', () => {
     const output = printSingleFieldSchema({
-      type: listOf(nonNull(GraphQLString)),
+      type: wrapType(GraphQLString, '!]'),
     });
     expect(output).to.equal(dedent`
       schema {
@@ -124,7 +115,7 @@ describe('Type System Printer', () => {
 
   it('Prints [String!]! Field', () => {
     const output = printSingleFieldSchema({
-      type: nonNull(listOf(nonNull(GraphQLString))),
+      type: wrapType(GraphQLString, '!]!'),
     });
     expect(output).to.equal(dedent`
       schema {
@@ -216,7 +207,7 @@ describe('Type System Printer', () => {
   it('Prints String Field With Int! Arg', () => {
     const output = printSingleFieldSchema({
       type: GraphQLString,
-      args: { argOne: { type: nonNull(GraphQLInt) } },
+      args: { argOne: { type: wrapType(GraphQLInt, '!') } },
     });
     expect(output).to.equal(dedent`
       schema {

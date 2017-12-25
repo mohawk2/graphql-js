@@ -15,8 +15,7 @@ import {
   GraphQLObjectType,
   GraphQLString,
   GraphQLInt,
-  GraphQLList,
-  GraphQLNonNull,
+  wrapType,
 } from '../../type';
 
 // resolved() is shorthand for Promise.resolve()
@@ -67,7 +66,7 @@ describe('Execute: Accepts any iterable as list value', () => {
   it(
     'Accepts a Set as a List value',
     check(
-      GraphQLList(GraphQLString),
+      wrapType(GraphQLString, ']'),
       new Set(['apple', 'banana', 'apple', 'coconut']),
       { data: { nest: { test: ['apple', 'banana', 'coconut'] } } },
     ),
@@ -81,7 +80,7 @@ describe('Execute: Accepts any iterable as list value', () => {
 
   it(
     'Accepts an Generator function as a List value',
-    check(GraphQLList(GraphQLString), yieldItems(), {
+    check(wrapType(GraphQLString, ']'), yieldItems(), {
       data: { nest: { test: ['one', '2', 'true'] } },
     }),
   );
@@ -92,14 +91,14 @@ describe('Execute: Accepts any iterable as list value', () => {
 
   it(
     'Accepts function arguments as a List value',
-    check(GraphQLList(GraphQLString), getArgs('one', 'two'), {
+    check(wrapType(GraphQLString, ']'), getArgs('one', 'two'), {
       data: { nest: { test: ['one', 'two'] } },
     }),
   );
 
   it(
     'Does not accept (Iterable) String-literal as a List value',
-    check(GraphQLList(GraphQLString), 'Singluar', {
+    check(wrapType(GraphQLString, ']'), 'Singluar', {
       data: { nest: { test: null } },
       errors: [
         {
@@ -115,7 +114,7 @@ describe('Execute: Accepts any iterable as list value', () => {
 
 describe('Execute: Handles list nullability', () => {
   describe('[T]', () => {
-    const type = GraphQLList(GraphQLInt);
+    const type = wrapType(GraphQLInt, ']');
 
     describe('Array<T>', () => {
       it(
@@ -200,7 +199,7 @@ describe('Execute: Handles list nullability', () => {
   });
 
   describe('[T]!', () => {
-    const type = GraphQLNonNull(GraphQLList(GraphQLInt));
+    const type = wrapType(GraphQLInt, ']!');
 
     describe('Array<T>', () => {
       it(
@@ -308,7 +307,7 @@ describe('Execute: Handles list nullability', () => {
   });
 
   describe('[T!]', () => {
-    const type = GraphQLList(GraphQLNonNull(GraphQLInt));
+    const type = wrapType(GraphQLInt, '!]');
 
     describe('Array<T>', () => {
       it(
@@ -419,7 +418,7 @@ describe('Execute: Handles list nullability', () => {
   });
 
   describe('[T!]!', () => {
-    const type = GraphQLNonNull(GraphQLList(GraphQLNonNull(GraphQLInt)));
+    const type = wrapType(GraphQLInt, '!]!');
 
     describe('Array<T>', () => {
       it(

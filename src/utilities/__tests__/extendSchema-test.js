@@ -21,8 +21,7 @@ import {
   GraphQLID,
   GraphQLString,
   GraphQLEnumType,
-  GraphQLNonNull,
-  GraphQLList,
+  wrapType,
   isScalarType,
   isNonNullType,
 } from '../../type';
@@ -42,7 +41,7 @@ const FooType = new GraphQLObjectType({
   fields: () => ({
     name: { type: GraphQLString },
     some: { type: SomeInterfaceType },
-    tree: { type: GraphQLNonNull(GraphQLList(FooType)) },
+    tree: { type: wrapType(FooType, ']!') },
   }),
 });
 
@@ -84,7 +83,7 @@ const testSchema = new GraphQLSchema({
       someUnion: { type: SomeUnionType },
       someEnum: { type: SomeEnumType },
       someInterface: {
-        args: { id: { type: GraphQLNonNull(GraphQLID) } },
+        args: { id: { type: wrapType(GraphQLID, '!') } },
         type: SomeInterfaceType,
       },
     }),

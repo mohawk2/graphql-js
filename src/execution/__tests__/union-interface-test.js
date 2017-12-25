@@ -15,7 +15,7 @@ import {
   GraphQLObjectType,
   GraphQLInterfaceType,
   GraphQLUnionType,
-  GraphQLList,
+  wrapType,
   GraphQLString,
   GraphQLBoolean,
 } from '../../type';
@@ -87,8 +87,8 @@ const PersonType = new GraphQLObjectType({
   interfaces: [NamedType],
   fields: {
     name: { type: GraphQLString },
-    pets: { type: GraphQLList(PetType) },
-    friends: { type: GraphQLList(NamedType) },
+    pets: { type: wrapType(PetType, ']') },
+    friends: { type: wrapType(NamedType, ']') },
   },
   isTypeOf: value => value instanceof Person,
 });
@@ -341,7 +341,7 @@ describe('Execute: Union and intersection types', () => {
       interfaces: [NamedType2],
       fields: {
         name: { type: GraphQLString },
-        friends: { type: GraphQLList(NamedType2) },
+        friends: { type: wrapType(NamedType2, ']') },
       },
     });
 

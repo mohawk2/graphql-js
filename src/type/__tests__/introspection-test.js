@@ -13,7 +13,7 @@ import {
   graphqlSync,
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLList,
+  wrapType,
   GraphQLInputObjectType,
   GraphQLString,
   GraphQLEnumType,
@@ -820,7 +820,7 @@ describe('Introspection', () => {
       name: 'TestInputObject',
       fields: {
         a: { type: GraphQLString, defaultValue: 'foo' },
-        b: { type: GraphQLList(GraphQLString) },
+        b: { type: wrapType(GraphQLString, ']') },
         c: { type: GraphQLString, defaultValue: null },
       },
     });

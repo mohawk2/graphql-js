@@ -13,7 +13,7 @@ import { parse } from '../../language';
 import {
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLList,
+  wrapType,
   GraphQLBoolean,
   GraphQLInt,
   GraphQLString,
@@ -202,8 +202,8 @@ describe('Execute: Handles basic execution tasks', () => {
       fields: {
         a: { type: GraphQLString },
         b: { type: GraphQLString },
-        c: { type: GraphQLList(GraphQLString) },
-        deeper: { type: GraphQLList(DataType) },
+        c: { type: wrapType(GraphQLString, ']') },
+        deeper: { type: wrapType(DataType, ']') },
       },
     });
 
@@ -447,7 +447,7 @@ describe('Execute: Handles basic execution tasks', () => {
           syncError: { type: GraphQLString },
           syncRawError: { type: GraphQLString },
           syncReturnError: { type: GraphQLString },
-          syncReturnErrorList: { type: GraphQLList(GraphQLString) },
+          syncReturnErrorList: { type: wrapType(GraphQLString, ']') },
           async: { type: GraphQLString },
           asyncReject: { type: GraphQLString },
           asyncRawReject: { type: GraphQLString },
@@ -549,13 +549,14 @@ describe('Execute: Handles basic execution tasks', () => {
         name: 'Query',
         fields: {
           foods: {
-            type: GraphQLList(
+            type: wrapType(
               new GraphQLObjectType({
                 name: 'Food',
                 fields: {
                   name: { type: GraphQLString },
                 },
               }),
+              ']',
             ),
             resolve() {
               return Promise.reject(new Error('Dangit'));
@@ -1033,7 +1034,7 @@ describe('Execute: Handles basic execution tasks', () => {
         name: 'Query',
         fields: {
           specials: {
-            type: GraphQLList(SpecialType),
+            type: wrapType(SpecialType, ']'),
             resolve: rootValue => rootValue.specials,
           },
         },

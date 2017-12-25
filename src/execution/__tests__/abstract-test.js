@@ -13,7 +13,7 @@ import {
   GraphQLObjectType,
   GraphQLInterfaceType,
   GraphQLUnionType,
-  GraphQLList,
+  wrapType,
   GraphQLString,
   GraphQLBoolean,
 } from '../../';
@@ -72,7 +72,7 @@ describe('Execute: Handles execution of abstract types', () => {
         name: 'Query',
         fields: {
           pets: {
-            type: GraphQLList(PetType),
+            type: wrapType(PetType, ']'),
             resolve() {
               return [new Dog('Odie', true), new Cat('Garfield', false)];
             },
@@ -141,7 +141,7 @@ describe('Execute: Handles execution of abstract types', () => {
         name: 'Query',
         fields: {
           pets: {
-            type: GraphQLList(PetType),
+            type: wrapType(PetType, ']'),
             resolve() {
               return [new Dog('Odie', true), new Cat('Garfield', false)];
             },
@@ -226,7 +226,7 @@ describe('Execute: Handles execution of abstract types', () => {
         name: 'Query',
         fields: {
           pets: {
-            type: GraphQLList(PetType),
+            type: wrapType(PetType, ']'),
             resolve() {
               return [
                 new Dog('Odie', true),
@@ -320,7 +320,7 @@ describe('Execute: Handles execution of abstract types', () => {
         name: 'Query',
         fields: {
           pets: {
-            type: GraphQLList(PetType),
+            type: wrapType(PetType, ']'),
             resolve() {
               return [
                 new Dog('Odie', true),
@@ -407,7 +407,7 @@ describe('Execute: Handles execution of abstract types', () => {
         name: 'Query',
         fields: {
           pets: {
-            type: GraphQLList(PetType),
+            type: wrapType(PetType, ']'),
             resolve() {
               return [new Dog('Odie', true), new Cat('Garfield', false)];
             },

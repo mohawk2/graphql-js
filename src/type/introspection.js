@@ -24,7 +24,7 @@ import {
   isAbstractType,
   isNamedType,
 } from './definition';
-import { GraphQLList, GraphQLNonNull } from '../type/wrappers';
+import { wrapType } from '../type/wrappers';
 import { GraphQLString, GraphQLBoolean } from './scalars';
 import { DirectiveLocation } from '../language/directiveLocation';
 import type { GraphQLField } from './definition';
@@ -39,7 +39,7 @@ export const __Schema = new GraphQLObjectType({
   fields: () => ({
     types: {
       description: 'A list of all types supported by this server.',
-      type: GraphQLNonNull(GraphQLList(GraphQLNonNull(__Type))),
+      type: wrapType(__Type, '!]!'),
       resolve(schema) {
         const typeMap = schema.getTypeMap();
         return Object.keys(typeMap).map(key => typeMap[key]);
@@ -47,7 +47,7 @@ export const __Schema = new GraphQLObjectType({
     },
     queryType: {
       description: 'The type that query operations will be rooted at.',
-      type: GraphQLNonNull(__Type),
+      type: wrapType(__Type, '!'),
       resolve: schema => schema.getQueryType(),
     },
     mutationType: {
@@ -66,7 +66,7 @@ export const __Schema = new GraphQLObjectType({
     },
     directives: {
       description: 'A list of all directives supported by this server.',
-      type: GraphQLNonNull(GraphQLList(GraphQLNonNull(__Directive))),
+      type: wrapType(__Directive, '!]!'),
       resolve: schema => schema.getDirectives(),
     },
   }),
@@ -83,20 +83,20 @@ export const __Directive = new GraphQLObjectType({
     'conditionally including or skipping a field. Directives provide this by ' +
     'describing additional information to the executor.',
   fields: () => ({
-    name: { type: GraphQLNonNull(GraphQLString) },
+    name: { type: wrapType(GraphQLString, '!') },
     description: { type: GraphQLString },
     locations: {
-      type: GraphQLNonNull(GraphQLList(GraphQLNonNull(__DirectiveLocation))),
+      type: wrapType(__DirectiveLocation, '!]!'),
     },
     args: {
-      type: GraphQLNonNull(GraphQLList(GraphQLNonNull(__InputValue))),
+      type: wrapType(__InputValue, '!]!'),
       resolve: directive => directive.args || [],
     },
     // NOTE: the following three fields are deprecated and are no longer part
     // of the GraphQL specification.
     onOperation: {
       deprecationReason: 'Use `locations`.',
-      type: GraphQLNonNull(GraphQLBoolean),
+      type: wrapType(GraphQLBoolean, '!'),
       resolve: d =>
         d.locations.indexOf(DirectiveLocation.QUERY) !== -1 ||
         d.locations.indexOf(DirectiveLocation.MUTATION) !== -1 ||
@@ -104,7 +104,7 @@ export const __Directive = new GraphQLObjectType({
     },
     onFragment: {
       deprecationReason: 'Use `locations`.',
-      type: GraphQLNonNull(GraphQLBoolean),
+      type: wrapType(GraphQLBoolean, '!'),
       resolve: d =>
         d.locations.indexOf(DirectiveLocation.FRAGMENT_SPREAD) !== -1 ||
         d.locations.indexOf(DirectiveLocation.INLINE_FRAGMENT) !== -1 ||
@@ -112,7 +112,7 @@ export const __Directive = new GraphQLObjectType({
     },
     onField: {
       deprecationReason: 'Use `locations`.',
-      type: GraphQLNonNull(GraphQLBoolean),
+      type: wrapType(GraphQLBoolean, '!'),
       resolve: d => d.locations.indexOf(DirectiveLocation.FIELD) !== -1,
     },
   }),
@@ -214,7 +214,7 @@ export const __Type = new GraphQLObjectType({
     'at runtime. List and NonNull types compose other types.',
   fields: () => ({
     kind: {
-      type: GraphQLNonNull(__TypeKind),
+      type: wrapType(__TypeKind, '!'),
       resolve(type) {
         if (isScalarType(type)) {
           return TypeKind.SCALAR;
@@ -239,7 +239,7 @@ export const __Type = new GraphQLObjectType({
     name: { type: GraphQLString },
     description: { type: GraphQLString },
     fields: {
-      type: GraphQLList(GraphQLNonNull(__Field)),
+      type: wrapType(__Field, '!]'),
       args: {
         includeDeprecated: { type: GraphQLBoolean, defaultValue: false },
       },
@@ -258,7 +258,7 @@ export const __Type = new GraphQLObjectType({
       },
     },
     interfaces: {
-      type: GraphQLList(GraphQLNonNull(__Type)),
+      type: wrapType(__Type, '!]'),
       resolve(type) {
         if (isObjectType(type)) {
           return type.getInterfaces();
@@ -266,7 +266,7 @@ export const __Type = new GraphQLObjectType({
       },
     },
     possibleTypes: {
-      type: GraphQLList(GraphQLNonNull(__Type)),
+      type: wrapType(__Type, '!]'),
       resolve(type, args, context, { schema }) {
         if (isAbstractType(type)) {
           return schema.getPossibleTypes(type);
@@ -274,7 +274,7 @@ export const __Type = new GraphQLObjectType({
       },
     },
     enumValues: {
-      type: GraphQLList(GraphQLNonNull(__EnumValue)),
+      type: wrapType(__EnumValue, '!]'),
       args: {
         includeDeprecated: { type: GraphQLBoolean, defaultValue: false },
       },
@@ -289,7 +289,7 @@ export const __Type = new GraphQLObjectType({
       },
     },
     inputFields: {
-      type: GraphQLList(GraphQLNonNull(__InputValue)),
+      type: wrapType(__InputValue, '!]'),
       resolve(type) {
         if (isInputObjectType(type)) {
           const fieldMap = type.getFields();
@@ -308,14 +308,14 @@ export const __Field = new GraphQLObjectType({
     'Object and Interface types are described by a list of Fields, each of ' +
     'which has a name, potentially a list of arguments, and a return type.',
   fields: () => ({
-    name: { type: GraphQLNonNull(GraphQLString) },
+    name: { type: wrapType(GraphQLString, '!') },
     description: { type: GraphQLString },
     args: {
-      type: GraphQLNonNull(GraphQLList(GraphQLNonNull(__InputValue))),
+      type: wrapType(__InputValue, '!]!'),
       resolve: field => field.args || [],
     },
-    type: { type: GraphQLNonNull(__Type) },
-    isDeprecated: { type: GraphQLNonNull(GraphQLBoolean) },
+    type: { type: wrapType(__Type, '!') },
+    isDeprecated: { type: wrapType(GraphQLBoolean, '!') },
     deprecationReason: {
       type: GraphQLString,
     },
@@ -330,9 +330,9 @@ export const __InputValue = new GraphQLObjectType({
     'InputObject are represented as Input Values which describe their type ' +
     'and optionally a default value.',
   fields: () => ({
-    name: { type: GraphQLNonNull(GraphQLString) },
+    name: { type: wrapType(GraphQLString, '!') },
     description: { type: GraphQLString },
-    type: { type: GraphQLNonNull(__Type) },
+    type: { type: wrapType(__Type, '!') },
     defaultValue: {
       type: GraphQLString,
       description:
@@ -354,9 +354,9 @@ export const __EnumValue = new GraphQLObjectType({
     'a placeholder for a string or numeric value. However an Enum value is ' +
     'returned in a JSON response as a string.',
   fields: () => ({
-    name: { type: GraphQLNonNull(GraphQLString) },
+    name: { type: wrapType(GraphQLString, '!') },
     description: { type: GraphQLString },
-    isDeprecated: { type: GraphQLNonNull(GraphQLBoolean) },
+    isDeprecated: { type: wrapType(GraphQLBoolean, '!') },
     deprecationReason: {
       type: GraphQLString,
     },
@@ -432,7 +432,7 @@ export const __TypeKind = new GraphQLEnumType({
 
 export const SchemaMetaFieldDef: GraphQLField<*, *> = {
   name: '__schema',
-  type: GraphQLNonNull(__Schema),
+  type: wrapType(__Schema, '!'),
   description: 'Access the current type schema of this server.',
   args: [],
   resolve: (source, args, context, { schema }) => schema,
@@ -442,13 +442,13 @@ export const TypeMetaFieldDef: GraphQLField<*, *> = {
   name: '__type',
   type: __Type,
   description: 'Request the type information of a single type.',
-  args: [{ name: 'name', type: GraphQLNonNull(GraphQLString) }],
+  args: [{ name: 'name', type: wrapType(GraphQLString, '!') }],
   resolve: (source, { name }, context, { schema }) => schema.getType(name),
 };
 
 export const TypeNameMetaFieldDef: GraphQLField<*, *> = {
   name: '__typename',
-  type: GraphQLNonNull(GraphQLString),
+  type: wrapType(GraphQLString, '!'),
   description: 'The name of the current Object type at runtime.',
   args: [],
   resolve: (source, args, context, { parentType }) => parentType.name,

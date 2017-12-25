@@ -12,13 +12,12 @@ import {
   GraphQLEnumType,
   GraphQLInputObjectType,
   GraphQLInterfaceType,
-  GraphQLList,
+  wrapType,
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
   GraphQLUnionType,
   GraphQLInt,
-  GraphQLNonNull,
 } from '../../type';
 import {
   BreakingChangeType,
@@ -156,22 +155,18 @@ describe('findBreakingChanges', () => {
         field3: { type: GraphQLString },
         field4: { type: TypeA },
         field6: { type: GraphQLString },
-        field7: { type: GraphQLList(GraphQLString) },
+        field7: { type: wrapType(GraphQLString, ']') },
         field8: { type: GraphQLInt },
-        field9: { type: GraphQLNonNull(GraphQLInt) },
-        field10: { type: GraphQLNonNull(GraphQLList(GraphQLInt)) },
+        field9: { type: wrapType(GraphQLInt, '!') },
+        field10: { type: wrapType(GraphQLInt, ']!') },
         field11: { type: GraphQLInt },
-        field12: { type: GraphQLList(GraphQLInt) },
-        field13: { type: GraphQLList(GraphQLNonNull(GraphQLInt)) },
-        field14: { type: GraphQLList(GraphQLInt) },
-        field15: { type: GraphQLList(GraphQLList(GraphQLInt)) },
-        field16: { type: GraphQLNonNull(GraphQLInt) },
-        field17: { type: GraphQLList(GraphQLInt) },
-        field18: {
-          type: GraphQLList(
-            GraphQLNonNull(GraphQLList(GraphQLNonNull(GraphQLInt))),
-          ),
-        },
+        field12: { type: wrapType(GraphQLInt, ']') },
+        field13: { type: wrapType(GraphQLInt, '!]') },
+        field14: { type: wrapType(GraphQLInt, ']') },
+        field15: { type: wrapType(GraphQLInt, ']]') },
+        field16: { type: wrapType(GraphQLInt, '!') },
+        field17: { type: wrapType(GraphQLInt, ']') },
+        field18: { type: wrapType(GraphQLInt, '!]!]') },
       },
     });
     const newType1 = new GraphQLInterfaceType({
@@ -181,21 +176,19 @@ describe('findBreakingChanges', () => {
         field3: { type: GraphQLBoolean },
         field4: { type: TypeB },
         field5: { type: GraphQLString },
-        field6: { type: GraphQLList(GraphQLString) },
+        field6: { type: wrapType(GraphQLString, ']') },
         field7: { type: GraphQLString },
-        field8: { type: GraphQLNonNull(GraphQLInt) },
+        field8: { type: wrapType(GraphQLInt, '!') },
         field9: { type: GraphQLInt },
-        field10: { type: GraphQLList(GraphQLInt) },
-        field11: { type: GraphQLNonNull(GraphQLList(GraphQLInt)) },
-        field12: { type: GraphQLList(GraphQLNonNull(GraphQLInt)) },
-        field13: { type: GraphQLList(GraphQLInt) },
-        field14: { type: GraphQLList(GraphQLList(GraphQLInt)) },
-        field15: { type: GraphQLList(GraphQLInt) },
-        field16: { type: GraphQLNonNull(GraphQLList(GraphQLInt)) },
-        field17: { type: GraphQLNonNull(GraphQLList(GraphQLInt)) },
-        field18: {
-          type: GraphQLList(GraphQLList(GraphQLNonNull(GraphQLInt))),
-        },
+        field10: { type: wrapType(GraphQLInt, ']') },
+        field11: { type: wrapType(GraphQLInt, ']!') },
+        field12: { type: wrapType(GraphQLInt, '!]') },
+        field13: { type: wrapType(GraphQLInt, ']') },
+        field14: { type: wrapType(GraphQLInt, ']]') },
+        field15: { type: wrapType(GraphQLInt, ']') },
+        field16: { type: wrapType(GraphQLInt, ']!') },
+        field17: { type: wrapType(GraphQLInt, ']!') },
+        field18: { type: wrapType(GraphQLInt, '!]]') },
       },
     });
 
@@ -271,100 +264,40 @@ describe('findBreakingChanges', () => {
     const oldInputType = new GraphQLInputObjectType({
       name: 'InputType1',
       fields: {
-        field1: {
-          type: GraphQLString,
-        },
-        field2: {
-          type: GraphQLBoolean,
-        },
-        field3: {
-          type: GraphQLList(GraphQLString),
-        },
-        field4: {
-          type: GraphQLNonNull(GraphQLString),
-        },
-        field5: {
-          type: GraphQLString,
-        },
-        field6: {
-          type: GraphQLList(GraphQLInt),
-        },
-        field7: {
-          type: GraphQLNonNull(GraphQLList(GraphQLInt)),
-        },
-        field8: {
-          type: GraphQLInt,
-        },
-        field9: {
-          type: GraphQLList(GraphQLInt),
-        },
-        field10: {
-          type: GraphQLList(GraphQLNonNull(GraphQLInt)),
-        },
-        field11: {
-          type: GraphQLList(GraphQLInt),
-        },
-        field12: {
-          type: GraphQLList(GraphQLList(GraphQLInt)),
-        },
-        field13: {
-          type: GraphQLNonNull(GraphQLInt),
-        },
-        field14: {
-          type: GraphQLList(GraphQLNonNull(GraphQLList(GraphQLInt))),
-        },
-        field15: {
-          type: GraphQLList(GraphQLNonNull(GraphQLList(GraphQLInt))),
-        },
+        field1: { type: GraphQLString },
+        field2: { type: GraphQLBoolean },
+        field3: { type: wrapType(GraphQLString, ']') },
+        field4: { type: wrapType(GraphQLString, '!') },
+        field5: { type: GraphQLString },
+        field6: { type: wrapType(GraphQLInt, ']') },
+        field7: { type: wrapType(GraphQLInt, ']!') },
+        field8: { type: GraphQLInt },
+        field9: { type: wrapType(GraphQLInt, ']') },
+        field10: { type: wrapType(GraphQLInt, '!]') },
+        field11: { type: wrapType(GraphQLInt, ']') },
+        field12: { type: wrapType(GraphQLInt, ']]') },
+        field13: { type: wrapType(GraphQLInt, '!') },
+        field14: { type: wrapType(GraphQLInt, ']!]') },
+        field15: { type: wrapType(GraphQLInt, ']!]') },
       },
     });
     const newInputType = new GraphQLInputObjectType({
       name: 'InputType1',
       fields: {
-        field1: {
-          type: GraphQLInt,
-        },
-        field3: {
-          type: GraphQLString,
-        },
-        field4: {
-          type: GraphQLString,
-        },
-        field5: {
-          type: GraphQLNonNull(GraphQLString),
-        },
-        field6: {
-          type: GraphQLNonNull(GraphQLList(GraphQLInt)),
-        },
-        field7: {
-          type: GraphQLList(GraphQLInt),
-        },
-        field8: {
-          type: GraphQLNonNull(GraphQLList(GraphQLInt)),
-        },
-        field9: {
-          type: GraphQLList(GraphQLNonNull(GraphQLInt)),
-        },
-        field10: {
-          type: GraphQLList(GraphQLInt),
-        },
-        field11: {
-          type: GraphQLList(GraphQLList(GraphQLInt)),
-        },
-        field12: {
-          type: GraphQLList(GraphQLInt),
-        },
-        field13: {
-          type: GraphQLNonNull(GraphQLList(GraphQLInt)),
-        },
-        field14: {
-          type: GraphQLList(GraphQLList(GraphQLInt)),
-        },
-        field15: {
-          type: GraphQLList(
-            GraphQLNonNull(GraphQLList(GraphQLNonNull(GraphQLInt))),
-          ),
-        },
+        field1: { type: GraphQLInt },
+        field3: { type: GraphQLString },
+        field4: { type: GraphQLString },
+        field5: { type: wrapType(GraphQLString, '!') },
+        field6: { type: wrapType(GraphQLInt, ']!') },
+        field7: { type: wrapType(GraphQLInt, ']') },
+        field8: { type: wrapType(GraphQLInt, ']!') },
+        field9: { type: wrapType(GraphQLInt, '!]') },
+        field10: { type: wrapType(GraphQLInt, ']') },
+        field11: { type: wrapType(GraphQLInt, ']]') },
+        field12: { type: wrapType(GraphQLInt, ']') },
+        field13: { type: wrapType(GraphQLInt, ']!') },
+        field14: { type: wrapType(GraphQLInt, ']]') },
+        field15: { type: wrapType(GraphQLInt, '!]!]') },
       },
     });
 
@@ -449,15 +382,9 @@ describe('findBreakingChanges', () => {
     const newInputType = new GraphQLInputObjectType({
       name: 'InputType1',
       fields: {
-        field1: {
-          type: GraphQLString,
-        },
-        requiredField: {
-          type: GraphQLNonNull(GraphQLInt),
-        },
-        optionalField: {
-          type: GraphQLBoolean,
-        },
+        field1: { type: GraphQLString },
+        requiredField: { type: wrapType(GraphQLInt, '!') },
+        optionalField: { type: GraphQLBoolean },
       },
     });
 
@@ -666,51 +593,21 @@ describe('findBreakingChanges', () => {
         field1: {
           type: GraphQLString,
           args: {
-            arg1: {
-              type: GraphQLString,
-            },
-            arg2: {
-              type: GraphQLString,
-            },
-            arg3: {
-              type: GraphQLList(GraphQLString),
-            },
-            arg4: {
-              type: GraphQLString,
-            },
-            arg5: {
-              type: GraphQLNonNull(GraphQLString),
-            },
-            arg6: {
-              type: GraphQLNonNull(GraphQLString),
-            },
-            arg7: {
-              type: GraphQLNonNull(GraphQLList(GraphQLInt)),
-            },
-            arg8: {
-              type: GraphQLInt,
-            },
-            arg9: {
-              type: GraphQLList(GraphQLInt),
-            },
-            arg10: {
-              type: GraphQLList(GraphQLNonNull(GraphQLInt)),
-            },
-            arg11: {
-              type: GraphQLList(GraphQLInt),
-            },
-            arg12: {
-              type: GraphQLList(GraphQLList(GraphQLInt)),
-            },
-            arg13: {
-              type: GraphQLNonNull(GraphQLInt),
-            },
-            arg14: {
-              type: GraphQLList(GraphQLNonNull(GraphQLList(GraphQLInt))),
-            },
-            arg15: {
-              type: GraphQLList(GraphQLNonNull(GraphQLList(GraphQLInt))),
-            },
+            arg1: { type: GraphQLString },
+            arg2: { type: GraphQLString },
+            arg3: { type: wrapType(GraphQLString, ']') },
+            arg4: { type: GraphQLString },
+            arg5: { type: wrapType(GraphQLString, '!') },
+            arg6: { type: wrapType(GraphQLString, '!') },
+            arg7: { type: wrapType(GraphQLInt, ']!') },
+            arg8: { type: GraphQLInt },
+            arg9: { type: wrapType(GraphQLInt, ']') },
+            arg10: { type: wrapType(GraphQLInt, '!]') },
+            arg11: { type: wrapType(GraphQLInt, ']') },
+            arg12: { type: wrapType(GraphQLInt, ']]') },
+            arg13: { type: wrapType(GraphQLInt, '!') },
+            arg14: { type: wrapType(GraphQLInt, ']!]') },
+            arg15: { type: wrapType(GraphQLInt, ']!]') },
           },
         },
       },
@@ -722,53 +619,21 @@ describe('findBreakingChanges', () => {
         field1: {
           type: GraphQLString,
           args: {
-            arg1: {
-              type: GraphQLInt,
-            },
-            arg2: {
-              type: GraphQLList(GraphQLString),
-            },
-            arg3: {
-              type: GraphQLString,
-            },
-            arg4: {
-              type: GraphQLNonNull(GraphQLString),
-            },
-            arg5: {
-              type: GraphQLInt,
-            },
-            arg6: {
-              type: GraphQLNonNull(GraphQLInt),
-            },
-            arg7: {
-              type: GraphQLList(GraphQLInt),
-            },
-            arg8: {
-              type: GraphQLNonNull(GraphQLList(GraphQLInt)),
-            },
-            arg9: {
-              type: GraphQLList(GraphQLNonNull(GraphQLInt)),
-            },
-            arg10: {
-              type: GraphQLList(GraphQLInt),
-            },
-            arg11: {
-              type: GraphQLList(GraphQLList(GraphQLInt)),
-            },
-            arg12: {
-              type: GraphQLList(GraphQLInt),
-            },
-            arg13: {
-              type: GraphQLNonNull(GraphQLList(GraphQLInt)),
-            },
-            arg14: {
-              type: GraphQLList(GraphQLList(GraphQLInt)),
-            },
-            arg15: {
-              type: GraphQLList(
-                GraphQLNonNull(GraphQLList(GraphQLNonNull(GraphQLInt))),
-              ),
-            },
+            arg1: { type: GraphQLInt },
+            arg2: { type: wrapType(GraphQLString, ']') },
+            arg3: { type: GraphQLString },
+            arg4: { type: wrapType(GraphQLString, '!') },
+            arg5: { type: GraphQLInt },
+            arg6: { type: wrapType(GraphQLInt, '!') },
+            arg7: { type: wrapType(GraphQLInt, ']') },
+            arg8: { type: wrapType(GraphQLInt, ']!') },
+            arg9: { type: wrapType(GraphQLInt, '!]') },
+            arg10: { type: wrapType(GraphQLInt, ']') },
+            arg11: { type: wrapType(GraphQLInt, ']]') },
+            arg12: { type: wrapType(GraphQLInt, ']') },
+            arg13: { type: wrapType(GraphQLInt, ']!') },
+            arg14: { type: wrapType(GraphQLInt, ']]') },
+            arg15: { type: wrapType(GraphQLInt, '!]!]') },
           },
         },
       },
@@ -856,9 +721,7 @@ describe('findBreakingChanges', () => {
         field1: {
           type: GraphQLString,
           args: {
-            arg1: {
-              type: GraphQLString,
-            },
+            arg1: { type: GraphQLString },
           },
         },
       },
@@ -870,15 +733,9 @@ describe('findBreakingChanges', () => {
         field1: {
           type: GraphQLString,
           args: {
-            arg1: {
-              type: GraphQLString,
-            },
-            newRequiredArg: {
-              type: GraphQLNonNull(GraphQLString),
-            },
-            newOptionalArg: {
-              type: GraphQLInt,
-            },
+            arg1: { type: GraphQLString },
+            newRequiredArg: { type: wrapType(GraphQLString, '!') },
+            newOptionalArg: { type: GraphQLInt },
           },
         },
       },
@@ -927,12 +784,8 @@ describe('findBreakingChanges', () => {
         field1: {
           type: GraphQLInt,
           args: {
-            arg1: {
-              type: GraphQLNonNull(GraphQLInt),
-            },
-            arg2: {
-              type: inputType1a,
-            },
+            arg1: { type: wrapType(GraphQLInt, '!') },
+            arg2: { type: inputType1a },
           },
         },
       },
@@ -944,12 +797,8 @@ describe('findBreakingChanges', () => {
         field1: {
           type: GraphQLInt,
           args: {
-            arg1: {
-              type: GraphQLNonNull(GraphQLInt),
-            },
-            arg2: {
-              type: inputType1b,
-            },
+            arg1: { type: wrapType(GraphQLInt, '!') },
+            arg2: { type: inputType1b },
           },
         },
       },
@@ -975,9 +824,7 @@ describe('findBreakingChanges', () => {
         field1: {
           type: GraphQLString,
           args: {
-            name: {
-              type: GraphQLNonNull(GraphQLString),
-            },
+            name: { type: wrapType(GraphQLString, '!') },
           },
         },
       },
@@ -1202,7 +1049,7 @@ describe('findBreakingChanges', () => {
       args: {
         arg1: {
           name: 'arg1',
-          type: GraphQLNonNull(GraphQLBoolean),
+          type: wrapType(GraphQLBoolean, '!'),
         },
       },
     });
@@ -1411,7 +1258,7 @@ describe('findBreakingChanges', () => {
           args: {
             arg1: {
               name: 'arg1',
-              type: GraphQLNonNull(GraphQLBoolean),
+              type: wrapType(GraphQLBoolean, '!'),
             },
           },
         }),

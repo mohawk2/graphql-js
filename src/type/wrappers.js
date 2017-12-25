@@ -8,7 +8,18 @@
  */
 
 import { assertType, assertNullableType } from './definition';
-import type { GraphQLType, GraphQLNullableType } from './definition';
+import type {
+  GraphQLType,
+  GraphQLNullableType,
+  GraphQLOutputType,
+  GraphQLScalarType,
+  GraphQLEnumType,
+  GraphQLInputObjectType,
+  GraphQLObjectType,
+  GraphQLInterfaceType,
+  GraphQLUnionType,
+} from './definition';
+import invariant from '../jsutils/invariant';
 
 /**
  * List Type Wrapper
@@ -89,3 +100,44 @@ const nonNullProto: any = GraphQLNonNull.prototype;
 nonNullProto.toString = nonNullProto.toJSON = nonNullProto.inspect = function toString() {
   return String(this.ofType) + '!';
 };
+
+// E.g. wrapType(String, '!]') -> List of NonNull String
+// For Flow reasons, you can't wrap already-wrapped types.
+// eslint-disable-next-line no-redeclare
+declare function wrapType(
+  // Output-only are grouped together as guarantee return OutputType
+  ofType: GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType,
+  wrapSpec: string,
+): GraphQLOutputType;
+// These declarations are by definition lies (they will be wrapped
+// versions) but are true enough that a thing that wants InputType or
+// OutputType will be satisfied.
+// eslint-disable-next-line no-redeclare
+declare function wrapType(
+  ofType: GraphQLScalarType,
+  wrapSpec: string,
+): GraphQLScalarType;
+// eslint-disable-next-line no-redeclare
+declare function wrapType(
+  ofType: GraphQLEnumType,
+  wrapSpec: string,
+): GraphQLEnumType;
+// eslint-disable-next-line no-redeclare
+declare function wrapType(
+  ofType: GraphQLInputObjectType,
+  wrapSpec: string,
+): GraphQLInputObjectType;
+// eslint-disable-next-line no-redeclare
+export function wrapType(ofType, wrapSpec) {
+  invariant(wrapSpec !== '', 'Zero-length wrapSpec given.');
+  return wrapSpec.split('').reduce((type, specChar) => {
+    switch (specChar) {
+      case ']':
+        return GraphQLList(type);
+      case '!':
+        return GraphQLNonNull((type: GraphQLNullableType));
+      default:
+        throw new Error('Invalid wrapSpec character: ' + specChar);
+    }
+  }, ofType);
+}

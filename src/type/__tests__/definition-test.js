@@ -13,8 +13,8 @@ import {
   GraphQLInterfaceType,
   GraphQLObjectType,
   GraphQLUnionType,
+  wrapType,
   GraphQLList,
-  GraphQLNonNull,
   GraphQLInt,
   GraphQLString,
   GraphQLBoolean,
@@ -66,7 +66,7 @@ const BlogQuery = new GraphQLObjectType({
       type: BlogArticle,
     },
     feed: {
-      type: GraphQLList(BlogArticle),
+      type: wrapType(BlogArticle, ']'),
     },
   },
 });
@@ -345,11 +345,11 @@ describe('Type System: Example', () => {
     expect(String(UnionType)).to.equal('Union');
     expect(String(EnumType)).to.equal('Enum');
     expect(String(InputObjectType)).to.equal('InputObject');
-    expect(String(GraphQLNonNull(GraphQLInt))).to.equal('Int!');
-    expect(String(GraphQLList(GraphQLInt))).to.equal('[Int]');
-    expect(String(GraphQLNonNull(GraphQLList(GraphQLInt)))).to.equal('[Int]!');
-    expect(String(GraphQLList(GraphQLNonNull(GraphQLInt)))).to.equal('[Int!]');
-    expect(String(GraphQLList(GraphQLList(GraphQLInt)))).to.equal('[[Int]]');
+    expect(String(wrapType(GraphQLInt, '!'))).to.equal('Int!');
+    expect(String(wrapType(GraphQLInt, ']'))).to.equal('[Int]');
+    expect(String(wrapType(GraphQLInt, ']!'))).to.equal('[Int]!');
+    expect(String(wrapType(GraphQLInt, '!]'))).to.equal('[Int!]');
+    expect(String(wrapType(GraphQLInt, ']]'))).to.equal('[[Int]]');
   });
 
   it('identifies input types', () => {
@@ -363,8 +363,8 @@ describe('Type System: Example', () => {
     ];
     expected.forEach(([type, answer]) => {
       expect(isInputType(type)).to.equal(answer);
-      expect(isInputType(GraphQLList(type))).to.equal(answer);
-      expect(isInputType(GraphQLNonNull(type))).to.equal(answer);
+      expect(isInputType(wrapType(type, ']'))).to.equal(answer);
+      expect(isInputType(wrapType(type, '!'))).to.equal(answer);
     });
   });
 
@@ -379,13 +379,13 @@ describe('Type System: Example', () => {
     ];
     expected.forEach(([type, answer]) => {
       expect(isOutputType(type)).to.equal(answer);
-      expect(isOutputType(GraphQLList(type))).to.equal(answer);
-      expect(isOutputType(GraphQLNonNull(type))).to.equal(answer);
+      expect(isOutputType(wrapType(type, ']'))).to.equal(answer);
+      expect(isOutputType(wrapType(type, '!'))).to.equal(answer);
     });
   });
 
   it('prohibits nesting NonNull inside NonNull', () => {
-    expect(() => GraphQLNonNull(GraphQLNonNull(GraphQLInt))).to.throw(
+    expect(() => wrapType(GraphQLInt, '!!')).to.throw(
       'Expected Int! to be a GraphQL nullable type.',
     );
   });
@@ -1108,21 +1108,21 @@ describe('Type System: List must accept only types', () => {
     InterfaceType,
     EnumType,
     InputObjectType,
-    GraphQLList(GraphQLString),
-    GraphQLNonNull(GraphQLString),
+    wrapType(GraphQLString, ']'),
+    wrapType(GraphQLString, '!'),
   ];
 
   const notTypes = [{}, String, undefined, null];
 
   types.forEach(type => {
     it(`accepts an type as item type of list: ${type}`, () => {
-      expect(() => GraphQLList(type)).not.to.throw();
+      expect(() => wrapType(type, ']')).not.to.throw();
     });
   });
 
   notTypes.forEach(type => {
     it(`rejects a non-type as item type of list: ${type}`, () => {
-      expect(() => GraphQLList(type)).to.throw(
+      expect(() => wrapType(type, ']')).to.throw(
         `Expected ${type} to be a GraphQL type.`,
       );
     });
@@ -1138,12 +1138,12 @@ describe('Type System: NonNull must only accept non-nullable types', () => {
     InterfaceType,
     EnumType,
     InputObjectType,
-    GraphQLList(GraphQLString),
-    GraphQLList(GraphQLNonNull(GraphQLString)),
+    wrapType(GraphQLString, ']'),
+    wrapType(GraphQLString, '!]'),
   ];
 
   const notNullableTypes = [
-    GraphQLNonNull(GraphQLString),
+    wrapType(GraphQLString, '!'),
     {},
     String,
     undefined,
@@ -1152,13 +1152,13 @@ describe('Type System: NonNull must only accept non-nullable types', () => {
 
   nullableTypes.forEach(type => {
     it(`accepts an type as nullable type of non-null: ${type}`, () => {
-      expect(() => GraphQLNonNull(type)).not.to.throw();
+      expect(() => wrapType(type, '!')).not.to.throw();
     });
   });
 
   notNullableTypes.forEach(type => {
     it(`rejects a non-type as nullable type of non-null: ${type}`, () => {
-      expect(() => GraphQLNonNull(type)).to.throw(
+      expect(() => wrapType(type, '!')).to.throw(
         `Expected ${type} to be a GraphQL nullable type.`,
       );
     });

@@ -48,6 +48,8 @@ export {
   GraphQLList,
   GraphQLNonNull,
   GraphQLDirective,
+  // Type wrapper utility
+  wrapType,
   // "Enum" of Type Kinds
   TypeKind,
   // Scalars

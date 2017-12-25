@@ -13,8 +13,7 @@ import { parse } from '../../language';
 import {
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLList,
-  GraphQLNonNull,
+  wrapType,
   GraphQLInt,
   GraphQLString,
   GraphQLBoolean,
@@ -49,12 +48,12 @@ describe('Execute: Handles execution with a complex schema', () => {
     const BlogArticle = new GraphQLObjectType({
       name: 'Article',
       fields: {
-        id: { type: GraphQLNonNull(GraphQLString) },
+        id: { type: wrapType(GraphQLString, '!') },
         isPublished: { type: GraphQLBoolean },
         author: { type: BlogAuthor },
         title: { type: GraphQLString },
         body: { type: GraphQLString },
-        keywords: { type: GraphQLList(GraphQLString) },
+        keywords: { type: wrapType(GraphQLString, ']') },
       },
     });
 
@@ -67,7 +66,7 @@ describe('Execute: Handles execution with a complex schema', () => {
           resolve: (_, { id }) => article(id),
         },
         feed: {
-          type: GraphQLList(BlogArticle),
+          type: wrapType(BlogArticle, ']'),
           resolve: () => [
             article(1),
             article(2),

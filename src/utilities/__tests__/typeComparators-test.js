@@ -12,8 +12,7 @@ import {
   GraphQLString,
   GraphQLInt,
   GraphQLFloat,
-  GraphQLList,
-  GraphQLNonNull,
+  wrapType,
   GraphQLObjectType,
   GraphQLInterfaceType,
   GraphQLUnionType,
@@ -32,22 +31,24 @@ describe('typeComparators', () => {
 
     it('lists of same type are equal', () => {
       expect(
-        isEqualType(GraphQLList(GraphQLInt), GraphQLList(GraphQLInt)),
+        isEqualType(wrapType(GraphQLInt, ']'), wrapType(GraphQLInt, ']')),
       ).to.equal(true);
     });
 
     it('lists is not equal to item', () => {
-      expect(isEqualType(GraphQLList(GraphQLInt), GraphQLInt)).to.equal(false);
+      expect(isEqualType(wrapType(GraphQLInt, ']'), GraphQLInt)).to.equal(
+        false,
+      );
     });
 
     it('non-null of same type are equal', () => {
       expect(
-        isEqualType(GraphQLNonNull(GraphQLInt), GraphQLNonNull(GraphQLInt)),
+        isEqualType(wrapType(GraphQLInt, '!'), wrapType(GraphQLInt, '!')),
       ).to.equal(true);
     });
 
     it('non-null is not equal to nullable', () => {
-      expect(isEqualType(GraphQLNonNull(GraphQLInt), GraphQLInt)).to.equal(
+      expect(isEqualType(wrapType(GraphQLInt, '!'), GraphQLInt)).to.equal(
         false,
       );
     });
@@ -78,28 +79,28 @@ describe('typeComparators', () => {
     it('non-null is subtype of nullable', () => {
       const schema = testSchema({ field: { type: GraphQLString } });
       expect(
-        isTypeSubTypeOf(schema, GraphQLNonNull(GraphQLInt), GraphQLInt),
+        isTypeSubTypeOf(schema, wrapType(GraphQLInt, '!'), GraphQLInt),
       ).to.equal(true);
     });
 
     it('nullable is not subtype of non-null', () => {
       const schema = testSchema({ field: { type: GraphQLString } });
       expect(
-        isTypeSubTypeOf(schema, GraphQLInt, GraphQLNonNull(GraphQLInt)),
+        isTypeSubTypeOf(schema, GraphQLInt, wrapType(GraphQLInt, '!')),
       ).to.equal(false);
     });
 
     it('item is not subtype of list', () => {
       const schema = testSchema({ field: { type: GraphQLString } });
       expect(
-        isTypeSubTypeOf(schema, GraphQLInt, GraphQLList(GraphQLInt)),
+        isTypeSubTypeOf(schema, GraphQLInt, wrapType(GraphQLInt, ']')),
       ).to.equal(false);
     });
 
     it('list is not subtype of item', () => {
       const schema = testSchema({ field: { type: GraphQLString } });
       expect(
-        isTypeSubTypeOf(schema, GraphQLList(GraphQLInt), GraphQLInt),
+        isTypeSubTypeOf(schema, wrapType(GraphQLInt, ']'), GraphQLInt),
       ).to.equal(false);
     });
 

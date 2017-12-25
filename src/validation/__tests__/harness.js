@@ -16,8 +16,7 @@ import {
   GraphQLUnionType,
   GraphQLEnumType,
   GraphQLInputObjectType,
-  GraphQLList,
-  GraphQLNonNull,
+  wrapType,
   GraphQLInt,
   GraphQLFloat,
   GraphQLString,
@@ -138,8 +137,8 @@ const Human = new GraphQLObjectType({
       type: GraphQLString,
       args: { surname: { type: GraphQLBoolean } },
     },
-    pets: { type: GraphQLList(Pet) },
-    relatives: { type: GraphQLList(Human) },
+    pets: { type: wrapType(Pet, ']') },
+    relatives: { type: wrapType(Human, ']') },
     iq: { type: GraphQLInt },
   }),
 });
@@ -182,11 +181,11 @@ const FurColor = new GraphQLEnumType({
 const ComplexInput = new GraphQLInputObjectType({
   name: 'ComplexInput',
   fields: {
-    requiredField: { type: GraphQLNonNull(GraphQLBoolean) },
+    requiredField: { type: wrapType(GraphQLBoolean, '!') },
     intField: { type: GraphQLInt },
     stringField: { type: GraphQLString },
     booleanField: { type: GraphQLBoolean },
-    stringListField: { type: GraphQLList(GraphQLString) },
+    stringListField: { type: wrapType(GraphQLString, ']') },
   },
 });
 
@@ -202,7 +201,7 @@ const ComplicatedArgs = new GraphQLObjectType({
     },
     nonNullIntArgField: {
       type: GraphQLString,
-      args: { nonNullIntArg: { type: GraphQLNonNull(GraphQLInt) } },
+      args: { nonNullIntArg: { type: wrapType(GraphQLInt, '!') } },
     },
     stringArgField: {
       type: GraphQLString,
@@ -226,7 +225,7 @@ const ComplicatedArgs = new GraphQLObjectType({
     },
     stringListArgField: {
       type: GraphQLString,
-      args: { stringListArg: { type: GraphQLList(GraphQLString) } },
+      args: { stringListArg: { type: wrapType(GraphQLString, ']') } },
     },
     complexArgField: {
       type: GraphQLString,
@@ -235,8 +234,8 @@ const ComplicatedArgs = new GraphQLObjectType({
     multipleReqs: {
       type: GraphQLString,
       args: {
-        req1: { type: GraphQLNonNull(GraphQLInt) },
-        req2: { type: GraphQLNonNull(GraphQLInt) },
+        req1: { type: wrapType(GraphQLInt, '!') },
+        req2: { type: wrapType(GraphQLInt, '!') },
       },
     },
     multipleOpts: {
@@ -255,8 +254,8 @@ const ComplicatedArgs = new GraphQLObjectType({
     multipleOptAndReq: {
       type: GraphQLString,
       args: {
-        req1: { type: GraphQLNonNull(GraphQLInt) },
-        req2: { type: GraphQLNonNull(GraphQLInt) },
+        req1: { type: wrapType(GraphQLInt, '!') },
+        req2: { type: wrapType(GraphQLInt, '!') },
         opt1: {
           type: GraphQLInt,
           defaultValue: 0,

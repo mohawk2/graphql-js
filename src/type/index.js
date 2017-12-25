@@ -67,6 +67,8 @@ export {
   // Type Wrappers
   GraphQLList,
   GraphQLNonNull,
+  // Type utility
+  wrapType,
 } from './wrappers';
 
 export {

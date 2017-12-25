@@ -15,8 +15,7 @@ import {
   GraphQLUnionType,
   GraphQLEnumType,
   GraphQLInputObjectType,
-  GraphQLList,
-  GraphQLNonNull,
+  wrapType,
   GraphQLString,
 } from '../../';
 import { parse } from '../../language/parser';
@@ -62,9 +61,9 @@ const SomeInputObjectType = new GraphQLInputObjectType({
 
 function withModifiers(types) {
   return types
-    .concat(types.map(type => GraphQLList(type)))
-    .concat(types.map(type => GraphQLNonNull(type)))
-    .concat(types.map(type => GraphQLNonNull(GraphQLList(type))));
+    .concat(types.map(type => wrapType(type, ']')))
+    .concat(types.map(type => wrapType(type, '!')))
+    .concat(types.map(type => wrapType(type, ']!')));
 }
 
 const outputTypes = withModifiers([
@@ -544,8 +543,8 @@ describe('Type System: Union types must be valid', () => {
 
     const badUnionMemberTypes = [
       GraphQLString,
-      new GraphQLNonNull(SomeObjectType),
-      new GraphQLList(SomeObjectType),
+      wrapType(SomeObjectType, '!'),
+      wrapType(SomeObjectType, ']'),
       SomeInterfaceType,
       SomeUnionType,
       SomeEnumType,

@@ -13,9 +13,8 @@ import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLInputObjectType,
-  GraphQLList,
+  wrapType,
   GraphQLString,
-  GraphQLNonNull,
   GraphQLScalarType,
 } from '../../type';
 
@@ -45,8 +44,8 @@ const TestInputObject = new GraphQLInputObjectType({
   name: 'TestInputObject',
   fields: {
     a: { type: GraphQLString },
-    b: { type: GraphQLList(GraphQLString) },
-    c: { type: GraphQLNonNull(GraphQLString) },
+    b: { type: wrapType(GraphQLString, ']') },
+    c: { type: wrapType(GraphQLString, '!') },
     d: { type: TestComplexScalar },
   },
 });
@@ -54,8 +53,8 @@ const TestInputObject = new GraphQLInputObjectType({
 const TestNestedInputObject = new GraphQLInputObjectType({
   name: 'TestNestedInputObject',
   fields: {
-    na: { type: GraphQLNonNull(TestInputObject) },
-    nb: { type: GraphQLNonNull(GraphQLString) },
+    na: { type: wrapType(TestInputObject, '!') },
+    nb: { type: wrapType(GraphQLString, '!') },
   },
 });
 
@@ -74,7 +73,7 @@ const TestType = new GraphQLObjectType({
     },
     fieldWithNonNullableStringInput: {
       type: GraphQLString,
-      args: { input: { type: GraphQLNonNull(GraphQLString) } },
+      args: { input: { type: wrapType(GraphQLString, '!') } },
       resolve: (_, { input }) => input && JSON.stringify(input),
     },
     fieldWithDefaultArgumentValue: {
@@ -94,20 +93,20 @@ const TestType = new GraphQLObjectType({
     },
     list: {
       type: GraphQLString,
-      args: { input: { type: GraphQLList(GraphQLString) } },
+      args: { input: { type: wrapType(GraphQLString, ']') } },
       resolve: (_, { input }) => input && JSON.stringify(input),
     },
     nnList: {
       type: GraphQLString,
       args: {
-        input: { type: GraphQLNonNull(GraphQLList(GraphQLString)) },
+        input: { type: wrapType(GraphQLString, ']!') },
       },
       resolve: (_, { input }) => input && JSON.stringify(input),
     },
     listNN: {
       type: GraphQLString,
       args: {
-        input: { type: GraphQLList(GraphQLNonNull(GraphQLString)) },
+        input: { type: wrapType(GraphQLString, '!]') },
       },
       resolve: (_, { input }) => input && JSON.stringify(input),
     },
@@ -115,7 +114,7 @@ const TestType = new GraphQLObjectType({
       type: GraphQLString,
       args: {
         input: {
-          type: GraphQLNonNull(GraphQLList(GraphQLNonNull(GraphQLString))),
+          type: wrapType(GraphQLString, '!]!'),
         },
       },
       resolve: (_, { input }) => input && JSON.stringify(input),
