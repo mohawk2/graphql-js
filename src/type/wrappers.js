@@ -21,6 +21,28 @@ import type {
 } from './definition';
 import invariant from '../jsutils/invariant';
 
+// For memoising type-wrappers against their ofType
+type CacheTypeKey = ']' | '!';
+// void is to shut Flow up as that's in the definition of WeakMap
+type TypeCacheMap = { [CacheTypeKey]: GraphQLType } | void | null;
+const wrapperCache: WeakMap<GraphQLType, TypeCacheMap> = new WeakMap();
+
+// cache lookup
+function lookupOrMake(
+  ofType: GraphQLType,
+  specChar: CacheTypeKey,
+  cons: GraphQLType => mixed,
+) {
+  let thisObjectMap: TypeCacheMap = (wrapperCache.get(ofType): TypeCacheMap);
+  if (!thisObjectMap) {
+    wrapperCache.set(ofType, (thisObjectMap = {}));
+  }
+  if (!thisObjectMap[specChar]) {
+    thisObjectMap[specChar] = new cons(ofType);
+  }
+  return thisObjectMap[specChar];
+}
+
 /**
  * List Type Wrapper
  *
@@ -50,7 +72,8 @@ export function GraphQLList(ofType) {
   if (this instanceof GraphQLList) {
     this.ofType = assertType(ofType);
   } else {
-    return new GraphQLList(ofType);
+    assertType(ofType);
+    return lookupOrMake(ofType, ']', GraphQLList);
   }
 }
 
@@ -91,7 +114,8 @@ export function GraphQLNonNull(ofType) {
   if (this instanceof GraphQLNonNull) {
     this.ofType = assertNullableType(ofType);
   } else {
-    return new GraphQLNonNull(ofType);
+    assertNullableType(ofType);
+    return lookupOrMake(ofType, '!', GraphQLNonNull);
   }
 }
 
